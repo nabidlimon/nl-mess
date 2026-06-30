@@ -1,0 +1,8 @@
+{
+  "name": "nl-mess-tracker",
+  "description": "A comprehensive web app for managing hostel or mess meals, deposits, bazar expenses, and monthly settlements.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

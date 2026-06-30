@@ -1,0 +1,119 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSupremeAdmin() {
+      return isSignedIn() && request.auth.token.email == 'nabidahamed2003@gmail.com';
+    }
+
+    function isManager() {
+      return isSignedIn() && (
+        isSupremeAdmin() || (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'Manager'
+        )
+      );
+    }
+
+    function isMessAuthority() {
+      return isSignedIn() && (
+        isSupremeAdmin() || (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'Manager' || 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'MealManager')
+        )
+      );
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isSignedIn() && (request.auth.uid == userId || isMessAuthority());
+    }
+
+    // Generic rule for all other collections - Granting Supreme Admin "God Mode"
+    match /{path=**} {
+      allow read, write: if isSupremeAdmin();
+    }
+
+    // Messes Collection
+    match /messes/{messId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (
+        isSupremeAdmin() ||
+        (request.auth.uid in resource.data.get('managerIds', [])) || 
+        (resource.data.get('managerId', '') == request.auth.uid) || 
+        isManager()
+      );
+    }
+
+    // Meals Collection
+    match /meals/{mealId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Deposits Collection
+    match /deposits/{depositId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Bazar Costs Collection
+    match /bazarCosts/{costId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Rent Payments Collection
+    match /rentPayments/{rentId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Essential Costs Collection
+    match /essentialCosts/{costId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Settings Collection
+    match /settings/{settingId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Notices Collection
+    match /notices/{noticeId} {
+      allow read: if isSignedIn();
+      allow write: if isMessAuthority();
+    }
+
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // ChatMessages Collection
+    match /chatMessages/{messageId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isSignedIn() && (isSupremeAdmin() || resource.data.senderId == request.auth.uid);
+    }
+
+    // Presence Collection
+    match /presence/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Polls Collection
+    match /polls/{pollId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isMessAuthority();
+      allow update: if isSignedIn();
+    }
+  }
+}

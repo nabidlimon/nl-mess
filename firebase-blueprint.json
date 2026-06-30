@@ -1,0 +1,262 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user profile (Border, Manager, etc.)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["Manager", "MealManager", "Border"] },
+        "messId": { "type": "string" },
+        "messIds": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "room": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Active", "Inactive"] },
+        "isRegistered": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "role"]
+    },
+    "Mess": {
+      "title": "Mess",
+      "description": "A mess organization",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "managerPhone": { "type": "string" },
+        "email": { "type": "string" },
+        "totalBorders": { "type": "number" },
+        "photoUrl": { "type": "string" },
+        "address": { "type": "string" },
+        "managerIds": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "managerIds"]
+    },
+    "Meal": {
+      "title": "Meal Record",
+      "description": "Daily meal record for a member",
+      "type": "object",
+      "properties": {
+        "messId": { "type": "string" },
+        "memberId": { "type": "string" },
+        "date": { "type": "string" },
+        "mealCount": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["messId", "memberId", "date", "mealCount"]
+    },
+    "Deposit": {
+      "title": "Deposit",
+      "description": "Deposit made by a member",
+      "type": "object",
+      "properties": {
+        "messId": { "type": "string" },
+        "memberId": { "type": "string" },
+        "amount": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "notes": { "type": "string" },
+        "date": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["messId", "memberId", "amount", "date"]
+    },
+    "BazarCost": {
+      "title": "Bazar Cost",
+      "description": "Daily bazar expenses",
+      "type": "object",
+      "properties": {
+        "messId": { "type": "string" },
+        "itemName": { "type": "string" },
+        "category": { "type": "string" },
+        "quantity": { "type": "number" },
+        "unitPrice": { "type": "number" },
+        "totalPrice": { "type": "number" },
+        "purchasedBy": { "type": "string" },
+        "date": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["messId", "itemName", "totalPrice", "date"]
+    },
+    "RentRecord": {
+      "title": "Rent Record",
+      "description": "Border room rent (vara) metadata",
+      "type": "object",
+      "properties": {
+        "messId": { "type": "string" },
+        "roomNo": { "type": "string" },
+        "allocatedRent": { "type": "number" },
+        "rentPaid": { "type": "number" },
+        "notes": { "type": "string" },
+        "date": { "type": "string" },
+        "serialNo": { "type": "string" },
+        "borderName": { "type": "string" }
+      },
+      "required": ["messId", "roomNo", "allocatedRent", "rentPaid", "date"]
+    },
+    "EssentialCost": {
+      "title": "Essential Cost",
+      "description": "Mess essential monthly costs (vara, utilities, etc.)",
+      "type": "object",
+      "properties": {
+        "messId": { "type": "string" },
+        "title": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["messId", "title", "amount", "date"]
+    },
+    "Settings": {
+      "title": "Mess Settings",
+      "description": "Global settings for the mess",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "currency": { "type": "string" },
+        "mealRate": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "Notice": {
+      "title": "Notice",
+      "description": "General announcement for the mess",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "messId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "author": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["messId", "title", "content", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Personal or system notifications",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "messId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string" },
+        "read": { "type": "boolean" },
+        "readBy": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "recipientRoles": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["messId", "title", "message", "createdAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Real-time chat messages for mess members group messaging",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "messId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "senderRole": { "type": "string" },
+        "senderPhoto": { "type": "string" },
+        "content": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "buzz"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["messId", "senderId", "senderName", "content", "createdAt"]
+    },
+    "Poll": {
+      "title": "Poll",
+      "description": "Food preference voting polls",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "messId": { "type": "string" },
+        "question": { "type": "string" },
+        "options": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "votes": {
+          "type": "object",
+          "description": "Map from option index to array of voter user UIDs"
+        },
+        "createdAt": { "type": "string" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["messId", "question", "options"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles"
+    },
+    "/messes/{messId}": {
+      "schema": { "$ref": "#/entities/Mess" },
+      "description": "Stores mess organization details"
+    },
+    "/meals/{mealId}": {
+      "schema": { "$ref": "#/entities/Meal" },
+      "description": "Stores daily meals per member"
+    },
+    "/deposits/{depositId}": {
+      "schema": { "$ref": "#/entities/Deposit" },
+      "description": "Stores deposits"
+    },
+    "/bazarCosts/{costId}": {
+      "schema": { "$ref": "#/entities/BazarCost" },
+      "description": "Stores daily expenses"
+    },
+    "/rentPayments/{rentId}": {
+      "schema": { "$ref": "#/entities/RentRecord" },
+      "description": "Stores room rents / vara collections"
+    },
+    "/essentialCosts/{costId}": {
+      "schema": { "$ref": "#/entities/EssentialCost" },
+      "description": "Stores mess essential utilities/rent expenses"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/Settings" },
+      "description": "Global settings"
+    },
+    "/notices/{noticeId}": {
+      "schema": { "$ref": "#/entities/Notice" },
+      "description": "Stores general notices"
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Stores user notifications"
+    },
+    "/chatMessages/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessage" },
+      "description": "Stores real-time mess group chat messages"
+    },
+    "/polls/{pollId}": {
+      "schema": { "$ref": "#/entities/Poll" },
+      "description": "Stores food preference polls and user votes"
+    }
+  }
+}
