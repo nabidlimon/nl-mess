@@ -113,17 +113,21 @@ function RoutesConfig() {
   );
 }
 
+import { ThemeProvider } from './contexts/ThemeContext';
+
 export default function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <MonthProvider>
-          <Router>
-            <RoutesConfig />
-          </Router>
-        </MonthProvider>
-      </AuthProvider>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <MonthProvider>
+            <Router>
+              <RoutesConfig />
+            </Router>
+          </MonthProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 
