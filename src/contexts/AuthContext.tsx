@@ -4,6 +4,7 @@ import { doc, getDoc, setDoc, collection, query, where, getDocs, documentId } fr
 import { auth, db } from '../lib/firebase';
 import { UserProfile, Mess } from '../types';
 import { handleFirestoreError, OperationType } from '../lib/firestore-error';
+import { AppLoadingScreen } from '../components/AppLoadingScreen';
 
 interface AuthContextType {
   user: User | null;
@@ -156,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, userProfile, currentMess, managedMesses, loading, signInWithGoogle, logout, refreshProfile, isSupreme, hasEntered, setHasEntered }}>
-      {!loading && children}
+      {loading ? <AppLoadingScreen /> : children}
     </AuthContext.Provider>
   );
 }

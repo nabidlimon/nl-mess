@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { MonthProvider } from './contexts/MonthContext';
 import { AppLayout } from './components/layout/AppLayout';
+import { AppLoadingScreen } from './components/AppLoadingScreen';
 
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -30,7 +31,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { t, language, setLanguage } = useLanguage();
   const location = useLocation();
   
-  if (loading) return null;
+  if (loading) return <AppLoadingScreen />;
   
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
