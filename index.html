@@ -4,11 +4,109 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>NL Mess</title>
+    <title>NL Mess Pro</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Instant Premium HTML/CSS Loader -->
+      <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #0f172a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        z-index: 99999;
+      ">
+        <!-- SVG Animated Logo -->
+        <div style="position: relative; margin-bottom: 24px; width: 84px; height: 84px;">
+          <!-- Glowing rotating loader ring -->
+          <svg style="
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 100px;
+            height: 100px;
+            animation: instantSpin 2s linear infinite;
+          " viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" stroke="url(#spinnerGrad)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="80 200" fill="none" />
+            <defs>
+              <linearGradient id="spinnerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#06b6d4" />
+                <stop offset="50%" stop-color="#8b5cf6" />
+                <stop offset="100%" stop-color="#ec4899" />
+              </linearGradient>
+            </defs>
+          </svg>
+          
+          <!-- Static Monogram Logo squircle matching brand design -->
+          <svg style="width: 84px; height: 84px;" viewBox="0 0 100 100" fill="none">
+            <!-- Background dark squircle -->
+            <rect width="100" height="100" rx="26" fill="#1e1b4b" />
+            <rect x="2" y="2" width="96" height="96" rx="24" stroke="white" stroke-width="1" stroke-opacity="0.1" fill="none" />
+            
+            {/* Roof / House top (Gold to Orange) */}
+            <path d="M 18 42 L 48 18 L 78 42" stroke="#f59e0b" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            
+            {/* 'N' Monogram (Teal to Emerald) */}
+            <path d="M 26 66 L 26 34 L 46 66 L 46 34" stroke="#06b6d4" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            
+            {/* 'L' Monogram (Purple to Pink) */}
+            <path d="M 58 42 L 58 66 L 78 66" stroke="#8b5cf6" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          </svg>
+        </div>
+
+        <!-- Title and Subtitle -->
+        <div style="text-align: center;">
+          <h1 style="
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.025em;
+            margin: 0 0 4px 0;
+          ">
+            <span style="background: linear-gradient(to right, #3b82f6, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">NL</span> Mess <span style="color: #3b82f6;">Pro</span>
+          </h1>
+          
+          <!-- Shimmering loading bar -->
+          <div style="
+            width: 120px;
+            height: 3px;
+            background-color: #334155;
+            border-radius: 9999px;
+            margin: 12px auto 0 auto;
+            overflow: hidden;
+            position: relative;
+          ">
+            <div style="
+              position: absolute;
+              left: 0;
+              height: 100%;
+              width: 50px;
+              background: linear-gradient(to right, #06b6d4, #8b5cf6);
+              border-radius: 9999px;
+              animation: instantLoadingBar 1.5s ease-in-out infinite;
+            "></div>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        @keyframes instantSpin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes instantLoadingBar {
+          0% { left: -50px; }
+          100% { left: 120px; }
+        }
+      </style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
