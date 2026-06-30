@@ -246,6 +246,103 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Notice Board Section */}
+      <div className="bg-slate-50 dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 transition-colors duration-200">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-5 gap-3">
+          <div className="flex items-center gap-3">
+            <span className="p-2.5 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-2xl text-blue-600 dark:text-blue-400 animate-pulse">
+               <Megaphone className="w-5 h-5" />
+            </span>
+            <div>
+               <h3 className="text-base font-black text-slate-900 dark:text-white">{language === 'bn' ? 'মেস নোটিশ বোর্ড' : 'Mess Notice Board'}</h3>
+               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{language === 'bn' ? 'ম্যানেজার কর্তৃক প্রচারিত সর্বশেষ নোটিশ ও ঘোষণাসমূহ' : 'Latest announcements and pinned notices from management'}</p>
+            </div>
+          </div>
+          {notices.length > 0 && (
+            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full shadow-xs">
+              {notices.length} {language === 'bn' ? 'টি নোটিশ' : 'notices'}
+            </span>
+          )}
+        </div>
+
+        {notices.length === 0 ? (
+          <div className="p-10 text-center bg-white dark:bg-slate-900/40 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+             <Bell className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2.5" />
+             <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{language === 'bn' ? 'কোন সক্রিয় নোটিশ নেই' : 'No active notices found'}</p>
+             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{language === 'bn' ? 'মেসের নতুন যেকোনো আপডেট এখানে দেখতে পাবেন।' : 'Unified notice board posts will display here.'}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             {notices.slice(0, 4).map((notice, idx) => {
+                const isLatest = idx === 0;
+                return (
+                  <div key={notice.id} className={cn(
+                     "p-5 rounded-2xl border transition-all duration-200 hover:shadow-sm group relative overflow-hidden bg-white dark:bg-slate-900/40 flex flex-col justify-between",
+                     isLatest ? "border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/5 dark:bg-indigo-950/5 shadow-xs ring-1 ring-indigo-100/50 dark:ring-indigo-900/30" : "border-slate-200 dark:border-slate-800"
+                  )}>
+                     <div>
+                       {isLatest && (
+                          <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase px-2.5 py-1 rounded-bl-xl tracking-widest">
+                             {language === 'bn' ? 'সর্বশেষ' : 'LATEST'}
+                          </div>
+                       )}
+                       <div className="flex items-start gap-3">
+                          <div className={cn(
+                             "p-2 w-8 h-8 rounded-xl shrink-0 flex items-center justify-center font-bold text-xs font-mono",
+                             isLatest ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400"
+                          )}>
+                             {idx + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                             <h4 className="text-sm font-black text-slate-800 dark:text-white truncate mb-1 pr-12">{notice.title}</h4>
+                             <div className="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold mb-3">
+                                <span>{notice.author}</span>
+                                <span>•</span>
+                                <span>{notice.createdAt?.toDate ? format(notice.createdAt.toDate(), 'PP p') : 'Just now'}</span>
+                             </div>
+                             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 whitespace-pre-wrap">{notice.content}</p>
+                          </div>
+                       </div>
+                     </div>
+                     <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-850">
+                        <div className="flex items-center gap-2">
+                           <button onClick={async () => {
+                              const ref = doc(db, 'notices', notice.id);
+                              if (notice.likes?.includes(userProfile?.id)) {
+                                 await updateDoc(ref, { likes: arrayRemove(userProfile?.id) });
+                              } else {
+                                 await updateDoc(ref, { likes: arrayUnion(userProfile?.id) });
+                              }
+                           }} className={cn("p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer", notice.likes?.includes(userProfile?.id) ? "bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400" : "hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-400 dark:text-slate-555")}>
+                              <Heart className={cn("w-3.5 h-3.5", notice.likes?.includes(userProfile?.id) ? "fill-rose-600" : "")} />
+                              <span className="text-[10px] font-bold">{notice.likes?.length || 0}</span>
+                           </button>
+                           <button onClick={async () => {
+                              const ref = doc(db, 'notices', notice.id);
+                              if (notice.thumbs?.includes(userProfile?.id)) {
+                                 await updateDoc(ref, { thumbs: arrayRemove(userProfile?.id) });
+                              } else {
+                                 await updateDoc(ref, { thumbs: arrayUnion(userProfile?.id) });
+                              }
+                           }} className={cn("p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer", notice.thumbs?.includes(userProfile?.id) ? "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400" : "hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-400 dark:text-slate-555")}>
+                              <ThumbsUp className={cn("w-3.5 h-3.5", notice.thumbs?.includes(userProfile?.id) ? "fill-amber-600" : "")} />
+                              <span className="text-[10px] font-bold">{notice.thumbs?.length || 0}</span>
+                           </button>
+                        </div>
+                        <button 
+                           onClick={() => setSelectedNotice(notice)}
+                           className="text-[10px] font-black text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 uppercase tracking-wider cursor-pointer bg-blue-50/50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/30 py-1.5 px-3 rounded-lg transition-colors"
+                        >
+                           {language === 'bn' ? 'পড়ুন' : 'Read'}
+                        </button>
+                     </div>
+                  </div>
+                );
+             })}
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* My Passbook Widget */}
         <div className="bg-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden ring-4 ring-slate-900/5">
@@ -426,140 +523,44 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Notice Board Section */}
-      <div className="bg-slate-50 rounded-3xl border border-slate-200 p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 pb-4 mb-5 gap-3">
-          <div className="flex items-center gap-3">
-            <span className="p-2.5 bg-blue-50 border border-blue-100 rounded-2xl text-blue-600 animate-pulse">
-               <Megaphone className="w-5 h-5" />
-            </span>
-            <div>
-               <h3 className="text-base font-black text-slate-900">{language === 'bn' ? 'মেস নোটিশ বোর্ড' : 'Mess Notice Board'}</h3>
-               <p className="text-xs text-slate-500 font-medium">{language === 'bn' ? 'ম্যানেজার কর্তৃক প্রচারিত সর্বশেষ নোটিশ ও ঘোষণাসমূহ' : 'Latest announcements and pinned notices from management'}</p>
-            </div>
-          </div>
-          {notices.length > 0 && (
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-xs">
-              {notices.length} {language === 'bn' ? 'টি নোটিশ' : 'notices'}
-            </span>
-          )}
-        </div>
-
-        {notices.length === 0 ? (
-          <div className="p-10 text-center bg-white rounded-2xl border border-dashed border-slate-350">
-             <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2.5" />
-             <p className="text-xs font-bold text-slate-700">{language === 'bn' ? 'কোন সক্রিয় নোটিশ নেই' : 'No active notices found'}</p>
-             <p className="text-[10px] text-slate-400 mt-1">{language === 'bn' ? 'মেসের নতুন যেকোনো আপডেট এখানে দেখতে পাবেন।' : 'Unified notice board posts will display here.'}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             {notices.slice(0, 4).map((notice, idx) => {
-                const isLatest = idx === 0;
-                return (
-                  <div key={notice.id} className={cn(
-                     "p-5 rounded-2xl border transition-all duration-200 hover:shadow-sm group relative overflow-hidden bg-white flex flex-col justify-between",
-                     isLatest ? "border-indigo-200 bg-indigo-50/5 shadow-xs ring-1 ring-indigo-100" : "border-slate-200"
-                  )}>
-                     <div>
-                       {isLatest && (
-                          <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase px-2.5 py-1 rounded-bl-xl tracking-widest">
-                             {language === 'bn' ? 'সর্বশেষ' : 'LATEST'}
-                          </div>
-                       )}
-                       <div className="flex items-start gap-3">
-                          <div className={cn(
-                             "p-2 w-8 h-8 rounded-xl shrink-0 flex items-center justify-center font-bold text-xs font-mono",
-                             isLatest ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-500"
-                          )}>
-                             {idx + 1}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                             <h4 className="text-sm font-black text-slate-800 truncate mb-1 pr-12">{notice.title}</h4>
-                             <div className="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold mb-3">
-                                <span>{notice.author}</span>
-                                <span>•</span>
-                                <span>{notice.createdAt?.toDate ? format(notice.createdAt.toDate(), 'PP p') : 'Just now'}</span>
-                             </div>
-                             <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 whitespace-pre-wrap">{notice.content}</p>
-                          </div>
-                       </div>
-                     </div>
-                     <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100">
-                        <div className="flex items-center gap-2">
-                           <button onClick={async () => {
-                              const ref = doc(db, 'notices', notice.id);
-                              if (notice.likes?.includes(userProfile?.id)) {
-                                 await updateDoc(ref, { likes: arrayRemove(userProfile?.id) });
-                              } else {
-                                 await updateDoc(ref, { likes: arrayUnion(userProfile?.id) });
-                              }
-                           }} className={cn("p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer", notice.likes?.includes(userProfile?.id) ? "bg-rose-50 text-rose-600" : "hover:bg-slate-50 text-slate-400")}>
-                              <Heart className={cn("w-3.5 h-3.5", notice.likes?.includes(userProfile?.id) ? "fill-rose-600" : "")} />
-                              <span className="text-[10px] font-bold">{notice.likes?.length || 0}</span>
-                           </button>
-                           <button onClick={async () => {
-                              const ref = doc(db, 'notices', notice.id);
-                              if (notice.thumbs?.includes(userProfile?.id)) {
-                                 await updateDoc(ref, { thumbs: arrayRemove(userProfile?.id) });
-                              } else {
-                                 await updateDoc(ref, { thumbs: arrayUnion(userProfile?.id) });
-                              }
-                           }} className={cn("p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer", notice.thumbs?.includes(userProfile?.id) ? "bg-amber-50 text-amber-600" : "hover:bg-slate-50 text-slate-400")}>
-                              <ThumbsUp className={cn("w-3.5 h-3.5", notice.thumbs?.includes(userProfile?.id) ? "fill-amber-600" : "")} />
-                              <span className="text-[10px] font-bold">{notice.thumbs?.length || 0}</span>
-                           </button>
-                        </div>
-                        <button 
-                           onClick={() => setSelectedNotice(notice)}
-                           className="text-[10px] font-black text-blue-600 hover:text-blue-700 flex items-center gap-1 uppercase tracking-wider cursor-pointer bg-blue-50/50 hover:bg-blue-100 py-1.5 px-3 rounded-lg transition-colors"
-                        >
-                           {language === 'bn' ? 'পড়ুন' : 'Read'}
-                        </button>
-                     </div>
-                  </div>
-                );
-             })}
-          </div>
-        )}
-      </div>
 
       {/* Notice Reader Drawer/Modal */}
       {selectedNotice && (
          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-            <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-scale-up border border-slate-100">
-               <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-scale-up border border-slate-105 dark:border-slate-800">
+               <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
                   <div className="flex items-center gap-2">
-                     <span className="p-1.5 bg-blue-100/60 rounded-lg text-blue-600">
+                     <span className="p-1.5 bg-blue-100/60 dark:bg-blue-950/30 rounded-lg text-blue-600 dark:text-blue-400">
                         <Megaphone className="w-4 h-4" />
                      </span>
-                     <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                     <span className="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase">
                         {language === 'bn' ? 'নোটিশ বিবরণ' : 'Announcements Details'}
                      </span>
                   </div>
                   <button 
                      onClick={() => setSelectedNotice(null)}
-                     className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
+                     className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all cursor-pointer"
                   >
                      <X className="w-4 h-4" />
                   </button>
                </div>
                <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
                   <div>
-                     <h3 className="text-xl font-black text-slate-900 leading-tight">{selectedNotice.title}</h3>
+                     <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight">{selectedNotice.title}</h3>
                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold mt-2">
                         <span>{selectedNotice.author}</span>
                         <span>•</span>
                         <span>{selectedNotice.createdAt?.toDate ? format(selectedNotice.createdAt.toDate(), 'PPP p') : 'Just now'}</span>
                      </div>
                   </div>
-                  <div className="border-t border-slate-100 pt-4">
-                     <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">{selectedNotice.content}</p>
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
+                     <p className="text-slate-600 dark:text-slate-350 text-sm leading-relaxed whitespace-pre-wrap">{selectedNotice.content}</p>
                   </div>
                </div>
-               <div className="p-4 bg-slate-50 border-t border-slate-150 flex justify-end">
+               <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-150 dark:border-slate-850 flex justify-end">
                   <button
                      onClick={() => setSelectedNotice(null)}
-                     className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow-md active:scale-95 cursor-pointer"
+                     className="px-5 py-2.5 bg-slate-900 dark:bg-slate-950 hover:bg-slate-850 dark:hover:bg-slate-900 text-white dark:text-slate-200 rounded-xl text-xs font-bold transition shadow-md active:scale-95 cursor-pointer"
                   >
                      {language === 'bn' ? 'বন্ধ করুন' : 'Close Details'}
                   </button>
