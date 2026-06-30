@@ -7,6 +7,7 @@ import { doc, setDoc, updateDoc, collection, query, getDocs, where } from 'fireb
 import { Mess, UserProfile, Notification } from '../types';
 import { LogOut, Home, Users, Plus, Search, CheckCircle, ArrowRight, ShieldCheck, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { LogoIcon } from '../components/Logo';
 
 export default function Onboarding() {
   const { user, userProfile, managedMesses, logout, refreshProfile, setHasEntered, hasEntered } = useAuth();
@@ -200,8 +201,8 @@ export default function Onboarding() {
       <div className="max-w-xl w-full">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl shadow-lg mb-6 rotate-3">
-             <Home className="text-white w-8 h-8" />
+          <div className="mb-6 flex justify-center">
+            <LogoIcon size={64} className="shadow-xl rounded-3xl hover:scale-105 transition-transform duration-200" />
           </div>
           <h1 className="text-4xl font-black tracking-tight mb-2">{t('onboarding.welcome')}</h1>
           <p className="text-slate-500 font-medium">{t('onboarding.sub')}</p>
