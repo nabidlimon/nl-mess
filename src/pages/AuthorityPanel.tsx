@@ -180,14 +180,26 @@ export default function AuthorityPanel() {
     try {
       setActionLoading(true);
       const existingMessIds = userProfile.messIds || [];
+      const memberships = (userProfile as any).memberships || {};
+      
+      // Inject Active Manager credentials for target spoofed mess
+      memberships[messId] = {
+        role: 'Manager',
+        status: 'Active',
+        room: ''
+      };
+
       await updateDoc(doc(db, 'users', userProfile.id), {
         messId: messId,
         messIds: Array.from(new Set([...existingMessIds, messId])),
         role: 'Manager',
-        status: 'Active'
+        status: 'Active',
+        memberships: memberships
       });
+      
+      localStorage.setItem('hasEntered', 'true');
       alert(t(`Masquerading as Manager for Mess ID ${messId}.`, `উক্ত মেস আইডির ম্যানেজার হিসেবে মেসে প্রবেশ করা হচ্ছে।`));
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       console.error(err);
       alert("Failed to spoof mess membership.");
