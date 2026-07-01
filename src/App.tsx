@@ -28,7 +28,7 @@ import Approvals from './pages/Approvals';
 import { useLanguage } from './contexts/LanguageContext';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { user, userProfile, loading, logout, isSupreme, hasEntered } = useAuth();
+  const { user, userProfile, loading, logout, isSupreme, hasEntered, setHasEntered } = useAuth();
   const { t, language, setLanguage } = useLanguage();
   const location = useLocation();
   
@@ -55,13 +55,18 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   // If Border is pending, show pending screen
   if (userProfile?.role === 'Border' && userProfile.status === 'Pending') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 font-sans text-center px-4 relative">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-55 dark:bg-[#0b0f19] font-sans text-center px-4 relative transition-colors duration-200">
+        
+        {/* Glowing backdrop elements for premium dark mode */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+
         {/* Floating Language Switcher */}
-        <div className="absolute top-4 right-4 flex bg-white border border-slate-200 rounded-full p-1 shadow-xs z-50">
+        <div className="absolute top-4 right-4 flex bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full p-1 shadow-xs z-50">
           <button
             onClick={() => setLanguage('en')}
             className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
-              language === 'en' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+              language === 'en' ? 'bg-blue-600 text-white' : 'text-slate-655 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             English
@@ -69,26 +74,38 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
           <button
             onClick={() => setLanguage('bn')}
             className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
-              language === 'bn' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+              language === 'bn' ? 'bg-blue-600 text-white' : 'text-slate-655 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             বাঙলা
           </button>
         </div>
 
-        <div className="max-w-md w-full bg-white border border-slate-200 p-8 rounded-2xl shadow-sm">
-          <div className="w-16 h-16 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold border border-yellow-100">!</div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{t('nav.pending')}</h2>
-          <p className="mt-3 text-slate-500 text-sm leading-relaxed">{t('nav.waiting_explanation')}</p>
-          <button
-            onClick={() => logout()}
-            className="mt-6 inline-flex justify-center items-center py-2 px-4 border border-slate-200 hover:bg-slate-50 text-sm font-semibold rounded-xl text-slate-700 transition cursor-pointer"
-          >
-            {t('nav.sign_out')}
-          </button>
+        <div className="max-w-md w-full bg-white dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-8 rounded-3xl shadow-xl">
+          <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/20 text-3xl font-extrabold animate-pulse">!</div>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{t('nav.pending')}</h2>
+          <p className="mt-3 text-slate-500 dark:text-slate-400 text-sm font-semibold leading-relaxed">{t('nav.waiting_explanation')}</p>
+          
+          <div className="mt-8 flex flex-col gap-3">
+            <button
+              onClick={() => {
+                setHasEntered(false);
+              }}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition cursor-pointer flex items-center justify-center shadow-md shadow-blue-500/10 active:scale-98"
+            >
+              {language === 'bn' ? 'মেস পরিবর্তন করুন / অন্য মেসে যোগ দিন' : 'Switch Mess / Join Another'}
+            </button>
+            
+            <button
+              onClick={() => logout()}
+              className="w-full py-3 border border-slate-250 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-bold rounded-xl text-slate-600 dark:text-slate-300 transition cursor-pointer flex items-center justify-center"
+            >
+              {t('nav.sign_out')}
+            </button>
+          </div>
         </div>
       </div>
-    )
+    );
   }
 
   return <AppLayout>{children}</AppLayout>;

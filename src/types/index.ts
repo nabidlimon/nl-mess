@@ -35,6 +35,11 @@ export interface UserProfile {
   isRegistered?: boolean;
   plainPin?: string;
   createdAt?: string;
+  memberships?: Record<string, {
+    role: 'Manager' | 'MealManager' | 'Border';
+    status: 'Pending' | 'Active' | 'Inactive';
+    room?: string;
+  }>;
 }
 
 // We will keep these interfaces, but add messId to them so data is isolated by mess

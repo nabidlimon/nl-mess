@@ -56,17 +56,64 @@ export default function Onboarding() {
     }
   }, [user, userProfile, navigate, managedMesses, hasEntered]);
 
+  const getMessMembership = (messId: string) => {
+    // 1. If user is in managerIds of the mess:
+    const messDoc = managedMesses.find(x => x.id === messId);
+    if (messDoc?.managerIds?.includes(userProfile?.id || '')) {
+      return { role: 'Manager' as const, status: 'Active' as const };
+    }
+    
+    // 2. Read from memberships map if available:
+    const memberships = (userProfile as any)?.memberships || {};
+    if (memberships[messId]) {
+      return {
+        role: (memberships[messId].role || 'Border') as 'Manager' | 'MealManager' | 'Border',
+        status: (memberships[messId].status || 'Pending') as 'Pending' | 'Active' | 'Inactive'
+      };
+    }
+    
+    // 3. Fallback to active profile if this is the current active mess:
+    if (userProfile?.messId === messId) {
+      return {
+        role: (userProfile.role || 'Border') as 'Manager' | 'MealManager' | 'Border',
+        status: (userProfile.status || 'Pending') as 'Pending' | 'Active' | 'Inactive'
+      };
+    }
+    
+    // 4. Default:
+    return { role: 'Border' as const, status: 'Pending' as const };
+  };
+
   const handleSwitchAndEnter = async (messId: string) => {
     if (!userProfile?.id || switchingMess) return;
     try {
       setSwitchingMess(true);
-      if (userProfile.messId !== messId) {
-        // Update active messId in Firestore
-        await updateDoc(doc(db, 'users', userProfile.id), { 
-          messId: messId
-        });
-        await refreshProfile();
+      
+      const existingMemberships = (userProfile as any).memberships || {};
+      
+      // Save current mess state to memberships map before switching
+      if (userProfile.messId) {
+        existingMemberships[userProfile.messId] = {
+          role: userProfile.role || 'Border',
+          status: userProfile.status || 'Pending',
+          room: (userProfile as any).room || ''
+        };
       }
+      
+      // Determine target state
+      const targetMess = getMessMembership(messId);
+      const targetRoom = existingMemberships[messId]?.room || '';
+      
+      // Update active state in Firestore
+      await updateDoc(doc(db, 'users', userProfile.id), {
+        messId: messId,
+        role: targetMess.role,
+        status: targetMess.status,
+        room: targetRoom,
+        memberships: existingMemberships
+      });
+      
+      await refreshProfile();
       setHasEntered(true);
       navigate('/');
     } catch (err) {
@@ -106,15 +153,34 @@ export default function Onboarding() {
       await setDoc(messRef, newMess);
       
       const existingMessIds = userProfile?.messIds || [];
+      const existingMemberships = (userProfile as any)?.memberships || {};
+      
+      // Save current mess state to memberships before switching
+      if (userProfile?.messId) {
+        existingMemberships[userProfile.messId] = {
+          role: userProfile.role || 'Border',
+          status: userProfile.status || 'Pending',
+          room: (userProfile as any).room || ''
+        };
+      }
+      
+      // Set new mess membership state
+      existingMemberships[messRef.id] = {
+        role: 'Manager',
+        status: 'Active',
+        room: ''
+      };
+
       const newProfile: Partial<UserProfile> = {
         name: userName || user.displayName || 'Anonymous',
         email: user.email || '',
-        role: 'Manager', // Upgrade them to manager if they created one
+        role: 'Manager', // Upgrade them to manager for active mess
         phone: messPhone,
         messId: messRef.id,
         messIds: Array.from(new Set([...existingMessIds, messRef.id])),
         status: 'Active',
         isRegistered: true,
+        memberships: existingMemberships as any
       };
 
       if (!userProfile) {
@@ -140,6 +206,24 @@ export default function Onboarding() {
     setLoading(true);
     try {
       const existingMessIds = userProfile?.messIds || [];
+      const existingMemberships = (userProfile as any)?.memberships || {};
+      
+      // Save current mess state to memberships before switching
+      if (userProfile?.messId) {
+        existingMemberships[userProfile.messId] = {
+          role: userProfile.role || 'Border',
+          status: userProfile.status || 'Pending',
+          room: (userProfile as any).room || ''
+        };
+      }
+      
+      // Set target mess membership state
+      existingMemberships[selectedMessId] = {
+        role: 'Border',
+        status: 'Pending',
+        room: ''
+      };
+
       const newProfileData: Partial<UserProfile> = {
         name: userName || user.displayName || 'Anonymous',
         email: user.email || '',
@@ -148,13 +232,10 @@ export default function Onboarding() {
         messIds: Array.from(new Set([...existingMessIds, selectedMessId])),
         institution: institution,
         status: 'Pending',
+        role: 'Border', // New mess starts with Border role active
         isRegistered: true,
+        memberships: existingMemberships as any
       };
-
-      // Preserve role if they are already a manager
-      if (!userProfile || userProfile.role !== 'Manager') {
-        newProfileData.role = 'Border';
-      }
 
       if (!userProfile) {
         (newProfileData as any).id = user.uid;
@@ -469,12 +550,30 @@ export default function Onboarding() {
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <Home className="w-4.5 h-4.5 text-blue-400 shrink-0" />
-                          <span className="truncate text-sm font-bold text-white">{m.name}</span>
-                          {m.managerIds?.includes(userProfile?.id || '') && (
-                            <span className="text-[8px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-black uppercase shrink-0">
-                              {language === 'bn' ? 'ম্যানেজার' : 'Manager'}
-                            </span>
-                          )}
+                          <div className="min-w-0">
+                            <span className="truncate text-sm font-bold text-white block">{m.name}</span>
+                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                              {/* Role Tag */}
+                              <span className={`text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-wider border shrink-0 ${
+                                getMessMembership(m.id).role === 'Manager'
+                                  ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                                  : getMessMembership(m.id).role === 'MealManager'
+                                  ? 'bg-sky-500/20 text-sky-400 border-sky-500/30'
+                                  : 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30'
+                              }`}>
+                                {getMessMembership(m.id).role === 'Manager' ? (language === 'bn' ? 'ম্যানেজার' : 'Manager') :
+                                 getMessMembership(m.id).role === 'MealManager' ? (language === 'bn' ? 'মিল ম্যানেজার' : 'Meal Manager') :
+                                 (language === 'bn' ? 'বর্ডার' : 'Border')}
+                              </span>
+                              
+                              {/* Status Tag */}
+                              {getMessMembership(m.id).status === 'Pending' && (
+                                <span className="text-[8px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-black uppercase tracking-wider shrink-0 animate-pulse">
+                                  {language === 'bn' ? 'অনুমোদন পেন্ডিং' : 'Pending Approval'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                         <div className="flex items-center justify-end gap-2.5 shrink-0 self-end sm:self-center">
                           <button
@@ -502,17 +601,22 @@ export default function Onboarding() {
                     )}
                   </div>
 
-                  {userProfile?.role !== 'Border' && (
-                    <div className="pt-4 border-t border-slate-800">
-                      <button 
-                        onClick={() => setStep('register_mess')}
-                        className="w-full py-3.5 bg-slate-800/60 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 border border-slate-700/80 shadow-md"
-                      >
-                        <Plus className="w-4 h-4" />
-                        {language === 'bn' ? 'নতুন মেস খুলুন' : 'Register Another Mess'}
-                      </button>
-                    </div>
-                  )}
+                  <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row gap-2.5">
+                    <button 
+                      onClick={() => setStep('register_mess')}
+                      className="flex-1 py-3 bg-slate-800/60 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-slate-700/80 shadow-md"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>{language === 'bn' ? 'নতুন মেস খুলুন' : 'Create New Mess'}</span>
+                    </button>
+                    <button 
+                      onClick={() => { setStep('join_mess'); fetchMesses(); }}
+                      className="flex-1 py-3 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-indigo-500/20 shadow-md"
+                    >
+                      <Users className="w-3.5 h-3.5" />
+                      <span>{language === 'bn' ? 'নতুন মেসে যুক্ত হন' : 'Join Another Mess'}</span>
+                    </button>
+                  </div>
                 </div>
                 
                 {/* Decorative gradients */}
