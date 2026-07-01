@@ -213,9 +213,13 @@ export default function Onboarding() {
       }
       
       // Set target mess membership state
+      const targetMessDoc = messes.find(m => m.id === selectedMessId);
+      const isNanolezMess = targetMessDoc?.name?.toLowerCase()?.includes('nanolez');
+      const targetStatus = isNanolezMess ? 'Active' : 'Pending';
+
       existingMemberships[selectedMessId] = {
         role: 'Border',
-        status: 'Pending',
+        status: targetStatus,
         room: ''
       };
 
@@ -226,7 +230,7 @@ export default function Onboarding() {
         messId: selectedMessId,
         messIds: Array.from(new Set([...existingMessIds, selectedMessId])),
         institution: institution,
-        status: 'Pending',
+        status: targetStatus,
         role: 'Border', // New mess starts with Border role active
         isRegistered: true,
         memberships: existingMemberships as any
