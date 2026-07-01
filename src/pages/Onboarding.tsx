@@ -37,11 +37,6 @@ export default function Onboarding() {
       return;
     }
 
-    if (hasEntered) {
-      navigate('/');
-      return;
-    }
-
     // Determine initial step based on profile and managed messes
     if (userProfile) {
       if (managedMesses.length > 0) {
@@ -54,7 +49,7 @@ export default function Onboarding() {
     } else {
       setStep('selection');
     }
-  }, [user, userProfile, navigate, managedMesses, hasEntered]);
+  }, [user, userProfile, navigate, managedMesses]);
 
   const getMessMembership = (messId: string) => {
     // 1. If user is in managerIds of the mess:

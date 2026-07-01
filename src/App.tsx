@@ -42,8 +42,8 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
   
-  // If not entered and not at onboarding, redirect to onboarding
-  if (!hasEntered && !isSupreme && location.pathname !== '/onboarding') {
+  // If no mess is selected yet, redirect to onboarding
+  if (!userProfile?.messId && !isSupreme && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
   }
 
