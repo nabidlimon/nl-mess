@@ -40,9 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (userSnap.exists()) {
         profile = userSnap.data() as UserProfile;
         profile.id = userSnap.id;
-        setUserProfile(profile);
-      } else {
-        setUserProfile(null);
       }
 
       // Always fetch all messes user manages, regardless of current active site
@@ -80,32 +77,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      setManagedMesses(managed);
-
+      // Fetch current active mess
+      let activeMess: Mess | null = null;
       if (profile) {
-        // Fetch current active mess
         if (profile.messId) {
            const activeManaged = managed.find(m => m.id === profile.messId);
            if (activeManaged) {
-             setCurrentMess(activeManaged);
+             activeMess = activeManaged;
            } else {
              const messRef = doc(db, 'messes', profile.messId);
              const messSnap = await getDoc(messRef);
              if (messSnap.exists()) {
-                setCurrentMess({ id: messSnap.id, ...messSnap.data() } as Mess);
-             } else {
-                setCurrentMess(null);
+                activeMess = { id: messSnap.id, ...messSnap.data() } as Mess;
              }
            }
         } else if (managed.length > 0) {
-           // Fallback to first managed mess if no active messId is set
-           setCurrentMess(managed[0]);
-        } else {
-           setCurrentMess(null);
+           activeMess = managed[0];
         }
-      } else {
-        setCurrentMess(null);
       }
+
+      // Batch state updates together at the end of the async flow to prevent flashing renders
+      setUserProfile(profile);
+      setManagedMesses(managed);
+      setCurrentMess(activeMess);
     } catch (err) {
       console.error("Error fetching profile", err);
     }
