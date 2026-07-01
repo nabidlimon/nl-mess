@@ -357,13 +357,16 @@ export default function Meals() {
     if (editedMeals[key] !== undefined) return editedMeals[key];
     if (mealMap[key]) return mealMap[key].displayValue || (mealMap[key].mealCount > 0 ? String(mealMap[key].mealCount) : '');
     
-    // Fallback: search backwards for the latest explicit meal record of this member before dateStr
-    const latest = meals
-      .filter(m => m.memberId === memberId && m.date < dateStr)
-      .sort((a, b) => b.date.localeCompare(a.date))[0];
-    
-    if (latest) {
-      return latest.displayValue || (latest.mealCount > 0 ? String(latest.mealCount) : '');
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    if (dateStr >= todayStr) {
+      // Fallback: search backwards for the latest explicit meal record of this member before dateStr
+      const latest = meals
+        .filter(m => m.memberId === memberId && m.date < dateStr)
+        .sort((a, b) => b.date.localeCompare(a.date))[0];
+      
+      if (latest) {
+        return latest.displayValue || (latest.mealCount > 0 ? String(latest.mealCount) : '');
+      }
     }
     return '';
   };
@@ -373,6 +376,10 @@ export default function Meals() {
     const key = `${memberId}_${dateStr}`;
     if (editedMeals[key] !== undefined) return false;
     if (mealMap[key]) return false;
+    
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    if (dateStr < todayStr) return false;
+    
     return true;
   };
 
@@ -410,7 +417,8 @@ export default function Meals() {
       
       // Look up effective meal document (explicit or inherited)
       let mDoc = mealMap[key];
-      if (!mDoc) {
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
+      if (!mDoc && dateStr >= todayStr) {
         const latest = meals
           .filter(x => x.memberId === m.id && x.date < dateStr)
           .sort((a, b) => b.date.localeCompare(a.date))[0];

@@ -194,6 +194,7 @@ export default function Dashboard() {
   const getMemberMealsForMonth = (memberId: string, monthStr: string) => {
     const currentMonthDate = parse(monthStr, 'yyyy-MM', new Date());
     const daysInMonth = getDaysInMonth(currentMonthDate);
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
     let total = 0;
     
     for (let day = 1; day <= daysInMonth; day++) {
@@ -201,7 +202,7 @@ export default function Dashboard() {
       const exact = meals.find(m => m.memberId === memberId && m.date === dateStr);
       if (exact) {
         total += exact.mealCount || 0;
-      } else {
+      } else if (dateStr >= todayStr) {
         const latest = meals
           .filter(m => m.memberId === memberId && m.date < dateStr)
           .sort((a, b) => b.date.localeCompare(a.date))[0];
@@ -328,14 +329,16 @@ export default function Dashboard() {
     
     const dayMeals = activeMembers.reduce((sum, member) => {
       const exact = meals.find(m => m.memberId === member.id && m.date === dateStr);
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
       if (exact) {
         return sum + (exact.mealCount || 0);
-      } else {
+      } else if (dateStr >= todayStr) {
         const latest = meals
           .filter(m => m.memberId === member.id && m.date < dateStr)
           .sort((a, b) => b.date.localeCompare(a.date))[0];
         return sum + (latest ? (latest.mealCount || 0) : 0);
       }
+      return sum;
     }, 0);
     const dayExpenses = currentMonthCosts.filter(c => c.date === dateStr).reduce((sum, c) => sum + c.totalPrice, 0);
     

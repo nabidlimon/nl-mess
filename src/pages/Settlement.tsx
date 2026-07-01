@@ -53,6 +53,7 @@ export default function Settlement() {
   const getMemberMealsForMonth = (memberId: string, monthStr: string) => {
     const currentMonthDate = parse(monthStr, 'yyyy-MM', new Date());
     const daysInMonth = getDaysInMonth(currentMonthDate);
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
     let total = 0;
     
     for (let day = 1; day <= daysInMonth; day++) {
@@ -60,7 +61,7 @@ export default function Settlement() {
       const exact = meals.find(m => m.memberId === memberId && m.date === dateStr);
       if (exact) {
         total += exact.mealCount || 0;
-      } else {
+      } else if (dateStr >= todayStr) {
         const latest = meals
           .filter(m => m.memberId === memberId && m.date < dateStr)
           .sort((a, b) => b.date.localeCompare(a.date))[0];
