@@ -22,6 +22,33 @@ body {
   color: #f8fafc;
 }
 
+/* Mobile Touch & Scroll Improvements */
+* {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button, 
+a, 
+select, 
+[role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input, 
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.custom-scrollbar,
+.excel-table-container,
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
 h1, h2, h3, .font-display {
   font-family: var(--font-display);
 }
