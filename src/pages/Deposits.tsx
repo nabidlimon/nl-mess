@@ -116,21 +116,21 @@ export default function Deposits() {
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* Premium Hero Stats Banner */}
-      <div className="bg-gradient-to-r from-blue-750 via-indigo-850 to-indigo-950 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-indigo-900/10 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-950 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-slate-950/20 border border-slate-800 relative overflow-hidden">
         {/* Subtle grid decoration */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px]" />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-white/10 rounded-xl backdrop-blur-md">
-                <Wallet className="w-6 h-6 text-blue-200" />
+              <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700">
+                <Wallet className="w-6 h-6 text-blue-500" />
               </div>
               <h1 className="text-3xl font-black tracking-tight text-white font-display">
                 {t('deposits.title')}
               </h1>
             </div>
-            <p className="text-blue-100 text-sm mt-2 max-w-xl leading-relaxed font-medium">
+            <p className="text-slate-400 text-sm mt-2 max-w-xl leading-relaxed font-semibold">
               {t('deposits.subtitle')}
             </p>
           </div>
@@ -138,46 +138,46 @@ export default function Deposits() {
           {isAdmin && (
             <button 
               onClick={() => { resetForm(); setIsModalOpen(true); }}
-              className="bg-white text-indigo-900 px-6 py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-blue-50 transition-all duration-150 cursor-pointer text-sm font-bold shadow-lg shadow-black/10 active:scale-[0.98] w-full md:w-auto self-stretch md:self-auto h-fit"
+              className="bg-blue-600 text-white px-6 py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all duration-150 cursor-pointer text-sm font-bold shadow-lg shadow-blue-600/10 active:scale-[0.98] w-full md:w-auto self-stretch md:self-auto h-fit"
             >
-              <Plus className="w-4 h-4 text-indigo-900 stroke-[3]" /> {t('deposits.record_title')}
+              <Plus className="w-4 h-4 text-white stroke-[3]" /> {t('deposits.record_title')}
             </button>
           )}
         </div>
 
         {/* Stats Grid inside Hero Card */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-6 border-t border-white/15 relative z-10">
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <span className="text-[10px] text-blue-200 font-bold uppercase tracking-wider block">{t('deposits.table_amount')}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-6 border-t border-slate-800 relative z-10">
+          <div className="bg-slate-900/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-800">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{t('deposits.table_amount')}</span>
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-3xl font-black text-white font-display tracking-tight">
                 {totalAmount.toFixed(2)}
               </span>
-              <span className="text-xs font-semibold text-blue-200">{t('common.currency')}</span>
+              <span className="text-xs font-semibold text-slate-400">{t('common.currency')}</span>
             </div>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <span className="text-[10px] text-blue-200 font-bold uppercase tracking-wider block">
+          <div className="bg-slate-900/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-800">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
               {language === 'bn' ? 'গড় ডিপোজিট' : 'Average Deposit'}
             </span>
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-3xl font-black text-white font-display tracking-tight">
                 {filteredDeposits.length > 0 ? (totalAmount / filteredDeposits.length).toFixed(2) : '0.00'}
               </span>
-              <span className="text-xs font-semibold text-blue-200">{t('common.currency')}</span>
+              <span className="text-xs font-semibold text-slate-400">{t('common.currency')}</span>
             </div>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <span className="text-[10px] text-blue-200 font-bold uppercase tracking-wider block">
+          <div className="bg-slate-900/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-800">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
               {language === 'bn' ? 'মোট লেনদেন সংখ্যা' : 'Total Deposits'}
             </span>
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-3xl font-black text-white font-display tracking-tight">
                 {filteredDeposits.length}
               </span>
-              <span className="text-xs font-semibold text-blue-200">{language === 'bn' ? 'টি' : 'records'}</span>
+              <span className="text-xs font-semibold text-slate-400">{language === 'bn' ? 'টি' : 'records'}</span>
             </div>
           </div>
         </div>

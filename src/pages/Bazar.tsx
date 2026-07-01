@@ -166,21 +166,21 @@ export default function Bazar() {
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* Premium Hero Stats Banner */}
-      <div className="bg-gradient-to-r from-rose-700 via-pink-850 to-rose-950 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-rose-900/10 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-950 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-slate-950/20 border border-slate-800 relative overflow-hidden">
         {/* Subtle grid decoration */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px]" />
         
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-white/10 rounded-xl backdrop-blur-md">
-                <ShoppingCart className="w-6 h-6 text-rose-200" />
+              <div className="p-2 bg-slate-800/80 rounded-xl border border-slate-700">
+                <ShoppingCart className="w-6 h-6 text-blue-500" />
               </div>
               <h1 className="text-3xl font-black tracking-tight text-white font-display">
                 {t('bazar.title')}
               </h1>
             </div>
-            <p className="text-rose-100 text-sm mt-2 max-w-xl leading-relaxed font-medium">
+            <p className="text-slate-400 text-sm mt-2 max-w-xl leading-relaxed font-semibold">
               {t('bazar.subtitle')}
             </p>
           </div>
@@ -188,53 +188,53 @@ export default function Bazar() {
           {isAdmin && (
             <button 
               onClick={() => { resetForm(); setIsModalOpen(true); }}
-              className="bg-white text-rose-950 px-6 py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-rose-50 transition-all duration-150 cursor-pointer text-sm font-bold shadow-lg shadow-black/10 active:scale-[0.98] w-full md:w-auto self-stretch md:self-auto h-fit"
+              className="bg-blue-600 text-white px-6 py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all duration-150 cursor-pointer text-sm font-bold shadow-lg shadow-blue-600/10 active:scale-[0.98] w-full md:w-auto self-stretch md:self-auto h-fit"
             >
-              <Plus className="w-4 h-4 text-rose-95 stroke-[3]" /> {t('bazar.add_cost')}
+              <Plus className="w-4 h-4 text-white stroke-[3]" /> {t('bazar.add_cost')}
             </button>
           )}
         </div>
 
         {/* Stats Grid inside Hero Card */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-6 border-t border-white/15 relative z-10">
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <span className="text-[10px] text-rose-200 font-bold uppercase tracking-wider block">{t('bazar.category')}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-6 border-t border-slate-800 relative z-10">
+          <div className="bg-slate-900/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-800">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">{t('bazar.category')}</span>
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-3xl font-black text-white font-display tracking-tight">
                 {currentMonthTotal.toFixed(2)}
               </span>
-              <span className="text-xs font-semibold text-rose-200">{t('common.currency')}</span>
+              <span className="text-xs font-semibold text-slate-400">{t('common.currency')}</span>
             </div>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <span className="text-[10px] text-rose-200 font-bold uppercase tracking-wider block">
+          <div className="bg-slate-900/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-800">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
               {language === 'bn' ? 'গড় বাজার খরচ' : 'Average Purchase'}
             </span>
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-3xl font-black text-white font-display tracking-tight">
                 {filteredCosts.length > 0 ? (currentMonthTotal / filteredCosts.length).toFixed(2) : '0.00'}
               </span>
-              <span className="text-xs font-semibold text-rose-200">{t('common.currency')}</span>
+              <span className="text-xs font-semibold text-slate-400">{t('common.currency')}</span>
             </div>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <span className="text-[10px] text-rose-200 font-bold uppercase tracking-wider block">
+          <div className="bg-slate-900/60 backdrop-blur-sm rounded-2xl p-4 border border-slate-800">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
               {language === 'bn' ? 'বাজার এন্ট্রি সংখ্যা' : 'Bazar Logs Count'}
             </span>
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-3xl font-black text-white font-display tracking-tight">
                 {filteredCosts.length}
               </span>
-              <span className="text-xs font-semibold text-rose-200">{language === 'bn' ? 'বার' : 'entries'}</span>
+              <span className="text-xs font-semibold text-slate-400">{language === 'bn' ? 'বার' : 'entries'}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Search Filter Controls */}
-      <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl border border-slate-200/80 shadow-xs max-w-md focus-within:ring-2 focus-within:ring-rose-600/20 focus-within:border-rose-600 transition-all">
+      <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl border border-slate-200/80 shadow-xs max-w-md focus-within:ring-2 focus-within:ring-blue-600/20 focus-within:border-blue-600 transition-all">
         <Search className="w-5 h-5 text-slate-400" />
         <input 
           type="text" 
