@@ -218,9 +218,21 @@ export default function Dashboard() {
   const todayMeals = meals.filter(m => m.date === todayDateStr);
   const todayBazarCost = costs.filter(c => c.date === todayDateStr).reduce((sum, c) => sum + c.totalPrice, 0);
 
-  const todayOwnBreakfast = todayMeals.filter(m => m.morning).length;
-  const todayOwnLunch = todayMeals.filter(m => m.lunch).length;
-  const todayOwnDinner = todayMeals.filter(m => m.dinner).length;
+  // Fallback segment builder for legacy or manager-edited meal logs
+  const getMealSegments = (m: Meal) => {
+    if (m.morning !== undefined && m.lunch !== undefined && m.dinner !== undefined) {
+      return { morning: !!m.morning, lunch: !!m.lunch, dinner: !!m.dinner };
+    }
+    const val = m.displayValue || String(m.mealCount || 0);
+    const morning = val.includes('0.5') || val.includes('1.5') || val.includes('2.5');
+    const lunch = val.includes('D') || Number(val) > 0.5;
+    const dinner = val.includes('N') || Number(val) > 1.5;
+    return { morning, lunch, dinner };
+  };
+
+  const todayOwnBreakfast = todayMeals.filter(m => getMealSegments(m).morning).length;
+  const todayOwnLunch = todayMeals.filter(m => getMealSegments(m).lunch).length;
+  const todayOwnDinner = todayMeals.filter(m => getMealSegments(m).dinner).length;
 
   const todayGuestBreakfast = todayMeals.reduce((sum, m) => sum + (m.guestMorning || 0), 0);
   const todayGuestLunch = todayMeals.reduce((sum, m) => sum + (m.guestLunch || 0), 0);

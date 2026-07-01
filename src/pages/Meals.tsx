@@ -210,6 +210,61 @@ export default function Meals() {
     }
   };
 
+  const parseMealFlags = (val: string) => {
+    const valUpper = val.toUpperCase().trim();
+    let morning = false;
+    let lunch = false;
+    let dinner = false;
+
+    if (valUpper === '2.5') {
+      morning = true;
+      lunch = true;
+      dinner = true;
+    } else if (valUpper === '2') {
+      morning = false;
+      lunch = true;
+      dinner = true;
+    } else if (valUpper === '1.5' || valUpper === '1.5D') {
+      morning = true;
+      lunch = true;
+      dinner = false;
+    } else if (valUpper === '1.5N') {
+      morning = true;
+      lunch = false;
+      dinner = true;
+    } else if (valUpper === '1' || valUpper === '1D') {
+      morning = false;
+      lunch = true;
+      dinner = false;
+    } else if (valUpper === '1N') {
+      morning = false;
+      lunch = false;
+      dinner = true;
+    } else if (valUpper === '0.5') {
+      morning = true;
+      lunch = false;
+      dinner = false;
+    } else {
+      const num = parseFloat(valUpper) || 0;
+      if (num >= 2.5) {
+        morning = true;
+        lunch = true;
+        dinner = true;
+      } else if (num >= 2) {
+        lunch = true;
+        dinner = true;
+      } else if (num >= 1.5) {
+        morning = true;
+        lunch = true;
+      } else if (num >= 1) {
+        lunch = true;
+      } else if (num >= 0.5) {
+        morning = true;
+      }
+    }
+    return { morning, lunch, dinner };
+  };
+
   const parseMealCount = (val: string) => {
     if (val === '') return 0;
     if (val.includes('N') || val.includes('D')) return parseFloat(val.replace(/[ND]/g, '')) || 0;
@@ -240,10 +295,17 @@ export default function Meals() {
         
         const count = parseMealCount(val);
         const display = parseDisplayValue(val);
+        const { morning, lunch, dinner } = parseMealFlags(val);
         
         if (existingMeal) {
           // Update
-          batch.update(doc(db, 'meals', existingMeal.id), { mealCount: count, displayValue: display });
+          batch.update(doc(db, 'meals', existingMeal.id), { 
+            mealCount: count, 
+            displayValue: display,
+            morning,
+            lunch,
+            dinner
+          });
         } else {
           // Create
           const newDocRef = doc(collection(db, 'meals'));
@@ -253,6 +315,9 @@ export default function Meals() {
             date,
             mealCount: count,
             displayValue: display,
+            morning,
+            lunch,
+            dinner,
             createdAt: new Date().toISOString()
           });
         }
