@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [costs, setCosts] = useState<BazarCost[]>([]);
   const [loading, setLoading] = useState(true);
   const [notices, setNotices] = useState<any[]>([]);
+  const [systemAlerts, setSystemAlerts] = useState<any[]>([]);
   const [selectedNotice, setSelectedNotice] = useState<any | null>(null);
   const [showApprovalsPopup, setShowApprovalsPopup] = useState(false);
 
@@ -317,6 +318,62 @@ export default function Dashboard() {
     }
   }, [loading, pendingAdmissions.length, pendingGuestMeals.length, isOverallManager, isMealManager, isAdmin]);
 
+  // Generate automated alerts for user balance or meal rate spikes
+  useEffect(() => {
+    if (loading || !userProfile) return;
+    const alerts: any[] = [];
+
+    // 1. Balance Alerts
+    if (myBalance < 0) {
+      alerts.push({
+        id: 'sys-due-alert',
+        title: language === 'bn' ? '⚠️ বকেয়া অ্যালার্ট: ব্যালেন্স নেতিবাচক!' : '⚠️ Due Alert: Negative Balance!',
+        author: language === 'bn' ? 'সিস্টেম অটো' : 'System Auto',
+        content: language === 'bn' 
+          ? `আপনার মেস অ্যাকাউন্টে বর্তমানে ${Math.abs(myBalance).toFixed(0)} ৳ বকেয়া রয়েছে। ঝামেলামুক্ত মিল পরিচালনার জন্য দ্রুত ডিপোজিট সম্পন্ন করুন।`
+          : `Your mess account currently has a due of BDT ${Math.abs(myBalance).toFixed(0)}. Please deposit funds to ensure uninterrupted meals.`,
+        createdAt: { toDate: () => new Date() },
+        isSystem: true,
+        type: 'danger',
+        likes: [],
+        thumbs: []
+      });
+    } else if (myBalance < 150) {
+      alerts.push({
+        id: 'sys-low-alert',
+        title: language === 'bn' ? '⚡ সতর্কবার্তা: কম ব্যালেন্স!' : '⚡ Warning: Low Balance!',
+        author: language === 'bn' ? 'সিস্টেম অটো' : 'System Auto',
+        content: language === 'bn' 
+          ? `আপনার ব্যালেন্স মাত্র ${myBalance.toFixed(0)} ৳ রয়েছে। মিল বন্ধ হওয়া এড়াতে দয়া করে সময়মতো রিচার্জ করুন।`
+          : `Your balance is only BDT ${myBalance.toFixed(0)}. Please recharge in time to prevent meal disruption.`,
+        createdAt: { toDate: () => new Date() },
+        isSystem: true,
+        type: 'warning',
+        likes: [],
+        thumbs: []
+      });
+    }
+
+    // 2. Meal Rate Spike Alert (if rate is > BDT 90)
+    if (mealRate > 90) {
+      alerts.push({
+        id: 'sys-rate-alert',
+        title: language === 'bn' ? '📈 মিল রেট বৃদ্ধি সতর্কতা!' : '📈 High Meal Rate Alert!',
+        author: language === 'bn' ? 'সিস্টেম অটো' : 'System Auto',
+        content: language === 'bn' 
+          ? `চলতি মাসে গড় মিল রেট ${mealRate.toFixed(2)} ৳ এ পৌঁছেছে। খরচ নিয়ন্ত্রণে রাখতে বাজার খরচ কমানোর পরামর্শ দেওয়া হচ্ছে।`
+          : `The running meal rate has reached BDT ${mealRate.toFixed(2)}. Consider coordinating with managers to manage grocery expenses.`,
+        createdAt: { toDate: () => new Date() },
+        isSystem: true,
+        type: 'info',
+        likes: [],
+        thumbs: []
+      });
+    }
+
+    setSystemAlerts(alerts);
+  }, [myBalance, mealRate, language, loading, userProfile]);
+
   // Chart data
   const [year, month] = selectedMonth.split('-');
   const daysInMonth = getDaysInMonth(new Date(parseInt(year), parseInt(month) - 1));
@@ -373,101 +430,142 @@ export default function Dashboard() {
       </div>
 
       {/* Notice Board Section */}
-      <div className="bg-slate-50 dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 transition-colors duration-200">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-5 gap-3">
-          <div className="flex items-center gap-3">
-            <span className="p-2.5 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-2xl text-blue-600 dark:text-blue-400 animate-pulse">
-               <Megaphone className="w-5 h-5" />
-            </span>
-            <div>
-               <h3 className="text-base font-black text-slate-900 dark:text-white">{language === 'bn' ? 'মেস নোটিশ বোর্ড' : 'Mess Notice Board'}</h3>
-               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{language === 'bn' ? 'ম্যানেজার কর্তৃক প্রচারিত সর্বশেষ নোটিশ ও ঘোষণাসমূহ' : 'Latest announcements and pinned notices from management'}</p>
+      {(() => {
+        const combinedNotices = [...systemAlerts, ...notices];
+        return (
+          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 transition-colors duration-200">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-5 gap-3">
+              <div className="flex items-center gap-3">
+                <span className="p-2.5 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-2xl text-blue-600 dark:text-blue-400 animate-pulse">
+                   <Megaphone className="w-5 h-5" />
+                </span>
+                <div>
+                   <h3 className="text-base font-black text-slate-900 dark:text-white">{language === 'bn' ? 'মেস নোটিশ বোর্ড' : 'Mess Notice Board'}</h3>
+                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{language === 'bn' ? 'ম্যানেজার কর্তৃক প্রচারিত সর্বশেষ নোটিশ ও ঘোষণাসমূহ' : 'Latest announcements and pinned notices from management'}</p>
+                </div>
+              </div>
+              {combinedNotices.length > 0 && (
+                <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full shadow-xs">
+                  {combinedNotices.length} {language === 'bn' ? 'টি নোটিশ' : 'notices'}
+                </span>
+              )}
             </div>
-          </div>
-          {notices.length > 0 && (
-            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-full shadow-xs">
-              {notices.length} {language === 'bn' ? 'টি নোটিশ' : 'notices'}
-            </span>
-          )}
-        </div>
 
-        {notices.length === 0 ? (
-          <div className="p-10 text-center bg-white dark:bg-slate-900/40 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
-             <Bell className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2.5" />
-             <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{language === 'bn' ? 'কোন সক্রিয় নোটিশ নেই' : 'No active notices found'}</p>
-             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{language === 'bn' ? 'মেসের নতুন যেকোনো আপডেট এখানে দেখতে পাবেন।' : 'Unified notice board posts will display here.'}</p>
+            {combinedNotices.length === 0 ? (
+              <div className="p-10 text-center bg-white dark:bg-slate-900/40 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+                 <Bell className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2.5" />
+                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{language === 'bn' ? 'কোন সক্রিয় নোটিশ নেই' : 'No active notices found'}</p>
+                 <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{language === 'bn' ? 'মেসের নতুন যেকোনো আপডেট এখানে দেখতে পাবেন।' : 'Unified notice board posts will display here.'}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 {combinedNotices.slice(0, 4).map((notice, idx) => {
+                    const isLatest = idx === 0;
+                    const isSystem = !!notice.isSystem;
+                    
+                    // Color code based on alert type or custom system styles
+                    let borderClass = 'border-slate-200 dark:border-slate-800';
+                    let bgClass = 'bg-white dark:bg-slate-900/40';
+                    if (isSystem) {
+                      if (notice.type === 'danger') {
+                        borderClass = 'border-red-200 dark:border-red-950/40';
+                        bgClass = 'bg-red-500/[0.03] dark:bg-red-500/[0.02]';
+                      } else if (notice.type === 'warning') {
+                        borderClass = 'border-amber-250 dark:border-amber-950/40';
+                        bgClass = 'bg-amber-500/[0.03] dark:bg-amber-500/[0.02]';
+                      } else {
+                        borderClass = 'border-blue-200 dark:border-blue-950/40';
+                        bgClass = 'bg-blue-500/[0.03] dark:bg-blue-500/[0.02]';
+                      }
+                    } else if (isLatest) {
+                      borderClass = 'border-indigo-200 dark:border-indigo-900/40 shadow-xs ring-1 ring-indigo-100/50 dark:ring-indigo-900/30';
+                      bgClass = 'bg-indigo-50/5 dark:bg-indigo-950/5';
+                    }
+
+                    return (
+                      <div key={notice.id} className={cn(
+                         "p-5 rounded-2xl border transition-all duration-200 hover:shadow-sm group relative overflow-hidden flex flex-col justify-between",
+                         borderClass,
+                         bgClass
+                      )}>
+                         <div>
+                            {isLatest && !isSystem && (
+                               <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase px-2.5 py-1 rounded-bl-xl tracking-widest">
+                                  {language === 'bn' ? 'সর্বশেষ' : 'LATEST'}
+                               </div>
+                            )}
+                            {isSystem && (
+                               <div className={cn(
+                                 "absolute top-0 right-0 text-white text-[8px] font-black uppercase px-2.5 py-1 rounded-bl-xl tracking-widest",
+                                 notice.type === 'danger' ? 'bg-red-600' : notice.type === 'warning' ? 'bg-amber-500' : 'bg-blue-600'
+                               )}>
+                                  {language === 'bn' ? 'অ্যালার্ট' : 'ALERT'}
+                               </div>
+                            )}
+                            <div className="flex items-start gap-3">
+                               <div className={cn(
+                                  "p-2 w-8 h-8 rounded-xl shrink-0 flex items-center justify-center font-bold text-xs font-mono",
+                                  isSystem
+                                    ? (notice.type === 'danger' ? 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400' : notice.type === 'warning' ? 'bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400' : 'bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400')
+                                    : (isLatest ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400")
+                               )}>
+                                  {idx + 1}
+                               </div>
+                               <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm font-black text-slate-800 dark:text-white truncate mb-1 pr-12">{notice.title}</h4>
+                                  <div className="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold mb-3">
+                                     <span>{notice.author}</span>
+                                     <span>•</span>
+                                     <span>{notice.createdAt?.toDate ? format(notice.createdAt.toDate(), 'PP p') : 'Just now'}</span>
+                                  </div>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 whitespace-pre-wrap">{notice.content}</p>
+                               </div>
+                            </div>
+                         </div>
+                         <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-850">
+                            {isSystem ? (
+                               <span className="text-[9px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase">{language === 'bn' ? 'সিস্টেম জেনারেটেড' : 'SYSTEM GENERATED'}</span>
+                            ) : (
+                               <div className="flex items-center gap-2">
+                                  <button onClick={async () => {
+                                     const ref = doc(db, 'notices', notice.id);
+                                     if (notice.likes?.includes(userProfile?.id)) {
+                                        await updateDoc(ref, { likes: arrayRemove(userProfile?.id) });
+                                     } else {
+                                        await updateDoc(ref, { likes: arrayUnion(userProfile?.id) });
+                                     }
+                                  }} className={cn("p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer", notice.likes?.includes(userProfile?.id) ? "bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400" : "hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-400 dark:text-slate-555")}>
+                                     <Heart className={cn("w-3.5 h-3.5", notice.likes?.includes(userProfile?.id) ? "fill-rose-600" : "")} />
+                                     <span className="text-[10px] font-bold">{notice.likes?.length || 0}</span>
+                                  </button>
+                                  <button onClick={async () => {
+                                     const ref = doc(db, 'notices', notice.id);
+                                     if (notice.thumbs?.includes(userProfile?.id)) {
+                                        await updateDoc(ref, { thumbs: arrayRemove(userProfile?.id) });
+                                     } else {
+                                        await updateDoc(ref, { thumbs: arrayUnion(userProfile?.id) });
+                                     }
+                                  }} className={cn("p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer", notice.thumbs?.includes(userProfile?.id) ? "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400" : "hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-400 dark:text-slate-555")}>
+                                     <ThumbsUp className={cn("w-3.5 h-3.5", notice.thumbs?.includes(userProfile?.id) ? "fill-amber-600" : "")} />
+                                     <span className="text-[10px] font-bold">{notice.thumbs?.length || 0}</span>
+                                  </button>
+                               </div>
+                            )}
+                            <button 
+                               onClick={() => setSelectedNotice(notice)}
+                               className="text-[10px] font-black text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 uppercase tracking-wider cursor-pointer bg-blue-50/50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/30 py-1.5 px-3 rounded-lg transition-colors"
+                            >
+                               {language === 'bn' ? 'পড়ুন' : 'Read'}
+                            </button>
+                         </div>
+                      </div>
+                    );
+                 })}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             {notices.slice(0, 4).map((notice, idx) => {
-                const isLatest = idx === 0;
-                return (
-                  <div key={notice.id} className={cn(
-                     "p-5 rounded-2xl border transition-all duration-200 hover:shadow-sm group relative overflow-hidden bg-white dark:bg-slate-900/40 flex flex-col justify-between",
-                     isLatest ? "border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/5 dark:bg-indigo-950/5 shadow-xs ring-1 ring-indigo-100/50 dark:ring-indigo-900/30" : "border-slate-200 dark:border-slate-800"
-                  )}>
-                     <div>
-                       {isLatest && (
-                          <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[8px] font-black uppercase px-2.5 py-1 rounded-bl-xl tracking-widest">
-                             {language === 'bn' ? 'সর্বশেষ' : 'LATEST'}
-                          </div>
-                       )}
-                       <div className="flex items-start gap-3">
-                          <div className={cn(
-                             "p-2 w-8 h-8 rounded-xl shrink-0 flex items-center justify-center font-bold text-xs font-mono",
-                             isLatest ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400"
-                          )}>
-                             {idx + 1}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                             <h4 className="text-sm font-black text-slate-800 dark:text-white truncate mb-1 pr-12">{notice.title}</h4>
-                             <div className="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold mb-3">
-                                <span>{notice.author}</span>
-                                <span>•</span>
-                                <span>{notice.createdAt?.toDate ? format(notice.createdAt.toDate(), 'PP p') : 'Just now'}</span>
-                             </div>
-                             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 whitespace-pre-wrap">{notice.content}</p>
-                          </div>
-                       </div>
-                     </div>
-                     <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-850">
-                        <div className="flex items-center gap-2">
-                           <button onClick={async () => {
-                              const ref = doc(db, 'notices', notice.id);
-                              if (notice.likes?.includes(userProfile?.id)) {
-                                 await updateDoc(ref, { likes: arrayRemove(userProfile?.id) });
-                              } else {
-                                 await updateDoc(ref, { likes: arrayUnion(userProfile?.id) });
-                              }
-                           }} className={cn("p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer", notice.likes?.includes(userProfile?.id) ? "bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400" : "hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-400 dark:text-slate-555")}>
-                              <Heart className={cn("w-3.5 h-3.5", notice.likes?.includes(userProfile?.id) ? "fill-rose-600" : "")} />
-                              <span className="text-[10px] font-bold">{notice.likes?.length || 0}</span>
-                           </button>
-                           <button onClick={async () => {
-                              const ref = doc(db, 'notices', notice.id);
-                              if (notice.thumbs?.includes(userProfile?.id)) {
-                                 await updateDoc(ref, { thumbs: arrayRemove(userProfile?.id) });
-                              } else {
-                                 await updateDoc(ref, { thumbs: arrayUnion(userProfile?.id) });
-                              }
-                           }} className={cn("p-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer", notice.thumbs?.includes(userProfile?.id) ? "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400" : "hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-400 dark:text-slate-555")}>
-                              <ThumbsUp className={cn("w-3.5 h-3.5", notice.thumbs?.includes(userProfile?.id) ? "fill-amber-600" : "")} />
-                              <span className="text-[10px] font-bold">{notice.thumbs?.length || 0}</span>
-                           </button>
-                        </div>
-                        <button 
-                           onClick={() => setSelectedNotice(notice)}
-                           className="text-[10px] font-black text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 uppercase tracking-wider cursor-pointer bg-blue-50/50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/30 py-1.5 px-3 rounded-lg transition-colors"
-                        >
-                           {language === 'bn' ? 'পড়ুন' : 'Read'}
-                        </button>
-                     </div>
-                  </div>
-                );
-             })}
-          </div>
-        )}
-      </div>
+        );
+      })()}
 
       {/* Today's Mess Overview (Manager View) */}
       {isAdmin && (

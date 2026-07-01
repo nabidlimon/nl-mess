@@ -107,7 +107,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const userInitial = userProfile?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U';
 
   return (
-    <div className="h-screen flex bg-slate-100 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased overflow-hidden transition-colors duration-200">
+    <div className="h-screen flex bg-slate-50 dark:bg-[#080d1a] font-sans text-slate-900 dark:text-slate-100 antialiased overflow-hidden transition-colors duration-200">
 
       {/* ─────────── DESKTOP SIDEBAR ─────────── */}
       <aside

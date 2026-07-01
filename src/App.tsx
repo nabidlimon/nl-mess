@@ -43,8 +43,8 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
   
-  // If no mess is selected yet, redirect to onboarding
-  if (!userProfile?.messId && !isSupreme && location.pathname !== '/onboarding') {
+  // If no mess is selected yet, or hasEntered is false, redirect to onboarding
+  if ((!userProfile?.messId || !hasEntered) && !isSupreme && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
   }
 
@@ -83,7 +83,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="max-w-md w-full bg-white dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800 p-8 rounded-3xl shadow-xl">
-          <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/20 text-3xl font-extrabold animate-pulse">!</div>
+          <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/25 text-3xl font-extrabold animate-pulse">!</div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{t('nav.pending')}</h2>
           <p className="mt-3 text-slate-500 dark:text-slate-400 text-sm font-semibold leading-relaxed">{t('nav.waiting_explanation')}</p>
           
@@ -112,15 +112,17 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return <AppLayout>{children}</AppLayout>;
 }
 
-function RoutesConfig() {
-  const { user, userProfile, loading } = useAuth();
+// Smart root component declared globally to prevent reconciliation issues/unmounting
+function SmartRoot() {
+  const { user, loading } = useAuth();
+  if (loading) return <AppLoadingScreen />;
+  if (user) return <Navigate to="/dashboard" replace />;
+  return <LandingPage />;
+}
 
-  // Smart root: show loader while auth resolves, redirect logged-in users to dashboard
-  const SmartRoot = () => {
-    if (loading) return <AppLoadingScreen />;
-    if (user) return <Navigate to="/dashboard" replace />;
-    return <LandingPage />;
-  };
+function RoutesConfig() {
+  const { user, userProfile } = useAuth();
+
 
   return (
     <Routes>
