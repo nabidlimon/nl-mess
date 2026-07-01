@@ -37,6 +37,10 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
+
+  if (location.pathname === '/onboarding') {
+    return <>{children}</>;
+  }
   
   // If not entered and not at onboarding, redirect to onboarding
   if (!hasEntered && !isSupreme && location.pathname !== '/onboarding') {
