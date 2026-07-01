@@ -12,6 +12,7 @@ export interface Mess {
   email: string; // Mess email
   managerIds: string[]; // List of user IDs of the managers
   createdAt?: string;
+  status?: 'Pending' | 'Active';
 }
 
 export interface UserProfile {

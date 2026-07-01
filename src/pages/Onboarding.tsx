@@ -142,7 +142,8 @@ export default function Onboarding() {
         totalBorders: parseInt(messCapacity),
         location: { lat: 0, lng: 0, address: '' },
         photoUrl: '',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        status: 'Pending'
       };
       
       await setDoc(messRef, newMess);
@@ -159,21 +160,21 @@ export default function Onboarding() {
         };
       }
       
-      // Set new mess membership state
+      // Set new mess membership state to Pending
       existingMemberships[messRef.id] = {
         role: 'Manager',
-        status: 'Active',
+        status: 'Pending',
         room: ''
       };
 
       const newProfile: Partial<UserProfile> = {
         name: userName || user.displayName || 'Anonymous',
         email: user.email || '',
-        role: 'Manager', // Upgrade them to manager for active mess
+        role: 'Manager', // Upgrade them to manager
         phone: messPhone,
         messId: messRef.id,
         messIds: Array.from(new Set([...existingMessIds, messRef.id])),
-        status: 'Active',
+        status: 'Pending',
         isRegistered: true,
         memberships: existingMemberships as any
       };
@@ -185,10 +186,26 @@ export default function Onboarding() {
       } else {
          await updateDoc(doc(db, 'users', user.uid), newProfile);
       }
+
+      // Create notification for Supreme Admin
+      const adminNotifRef = doc(collection(db, 'notifications'));
+      const adminNotification: Notification = {
+        id: adminNotifRef.id,
+        messId: messRef.id,
+        title: 'New Mess Registration Pending',
+        message: `The mess "${messName}" has been registered by manager ${messPhone} and requires approval.`,
+        type: 'JoinRequest', // Use JoinRequest or similar that AuthorityPanel/notifications can read
+        senderId: user.uid,
+        senderName: newProfile.name || 'Anonymous',
+        recipientRoles: ['SupremeAdmin'] as any,
+        readBy: [],
+        status: 'Unread',
+        createdAt: new Date().toISOString()
+      };
+      await setDoc(adminNotifRef, adminNotification);
       
       await refreshProfile();
-      setHasEntered(true);
-      navigate('/dashboard');
+      setStep('manager_choice');
     } catch (err) {
       console.error(err);
     } finally {

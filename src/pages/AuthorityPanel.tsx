@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, getDocs, doc, writeBatch, updateDoc, deleteDoc, where, setDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, writeBatch, updateDoc, deleteDoc, where, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Mess, Member, Meal, Deposit, BazarCost } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -115,6 +115,64 @@ export default function AuthorityPanel() {
   }
 
   // --- ADMINISTRATOR FUNCTIONS ---
+
+  // Approving a mess and its manager/creator
+  const handleApproveMess = async (mess: Mess) => {
+    if (!window.confirm(t(`Are you sure you want to approve "${mess.name}"?`, `আপনি কি নিশ্চিত যে আপনি "${mess.name}" মেসটি অনুমোদন করতে চান?`))) return;
+    try {
+      setActionLoading(true);
+      
+      // 1. Update Mess Status to Active
+      await updateDoc(doc(db, 'messes', mess.id), {
+        status: 'Active'
+      });
+
+      // 2. Find and update the creator/manager user doc
+      const managerId = mess.managerIds?.[0];
+      if (managerId) {
+        const managerDocRef = doc(db, 'users', managerId);
+        const managerSnap = await getDoc(managerDocRef);
+        
+        if (managerSnap.exists()) {
+          const managerData = managerSnap.data();
+          const memberships = managerData.memberships || {};
+          if (memberships[mess.id]) {
+            memberships[mess.id].status = 'Active';
+          }
+          await updateDoc(managerDocRef, {
+            status: 'Active',
+            memberships: memberships
+          });
+        } else {
+          await updateDoc(managerDocRef, {
+            status: 'Active'
+          });
+        }
+
+        // 3. Send approval notification to manager
+        await setDoc(doc(collection(db, 'notifications')), {
+          userId: managerId,
+          messId: mess.id,
+          title: t('Mess Registration Approved!', 'মেস অনুমোদন সম্পন্ন হয়েছে!'),
+          message: t(
+            `Your mess "${mess.name}" registration request has been approved by the Supreme Admin. You can now access your mess workspace.`,
+            `আপনার মেস "${mess.name}" খোলার আবেদন সুপ্রীম অ্যাডমিন কর্তৃক অনুমোদিত হয়েছে। এখন আপনি মেস ড্যাশবোর্ডে প্রবেশ করতে পারবেন।`
+          ),
+          type: 'approval',
+          read: false,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      alert(t('Mess successfully approved!', 'মেসটি সফলভাবে অনুমোদন করা হয়েছে!'));
+      fetchData(); // Refresh list
+    } catch (err) {
+      console.error(err);
+      alert("Failed to approve mess.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   // Entering a mess securely
   const handleEnterMess = async (messId: string) => {
@@ -488,9 +546,16 @@ export default function AuthorityPanel() {
                       <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                         <div className="flex justify-between items-start gap-4">
                           <div>
-                            <span className="inline-block px-2.5 py-0.5 text-[9px] font-black uppercase text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-md mb-2">
-                              {t('ID:', 'আইডি:')} {item.id}
-                            </span>
+                            <div className="flex flex-wrap gap-1.5 items-center mb-2">
+                              <span className="inline-block px-2.5 py-0.5 text-[9px] font-black uppercase text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-md">
+                                {t('ID:', 'আইডি:')} {item.id}
+                              </span>
+                              {item.status === 'Pending' && (
+                                <span className="inline-block px-2 py-0.5 text-[9px] font-black uppercase text-amber-755 bg-amber-50 border border-amber-250 rounded-md animate-pulse">
+                                  {t('Pending Approval', 'অনুমোদন পেন্ডিং')}
+                                </span>
+                              )}
+                            </div>
                             <h3 className="text-lg font-black text-slate-800 line-clamp-1 font-display">{item.name}</h3>
                           </div>
                         </div>
@@ -529,33 +594,44 @@ export default function AuthorityPanel() {
 
                       {/* Footer Actions */}
                       <div className="p-5 bg-white grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => { setSelectedMess(item); setSelectedMessDetailTab('users'); }}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/10 active:scale-[0.98] transition-all"
-                        >
-                          <Eye className="w-3.5 h-3.5" /> {t('Show Info', 'ডাটা এন্ট্রি')}
-                        </button>
-                        
-                        <button
-                          onClick={() => openEditMess(item)}
-                          className="border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-all"
-                        >
-                          <Edit className="w-3.5 h-3.5" /> {t('Config', 'কনফিগ')}
-                        </button>
+                        {item.status === 'Pending' ? (
+                          <button
+                            onClick={() => handleApproveMess(item)}
+                            className="col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 px-3 rounded-xl text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-emerald-600/10 active:scale-[0.98] transition-all"
+                          >
+                            <ShieldCheck className="w-4 h-4" /> {t('Approve Mess', 'মেস অনুমোদন করুন')}
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => { setSelectedMess(item); setSelectedMessDetailTab('users'); }}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/10 active:scale-[0.98] transition-all"
+                            >
+                              <Eye className="w-3.5 h-3.5" /> {t('Show Info', 'ডাটা এন্ট্রি')}
+                            </button>
+                            
+                            <button
+                              onClick={() => openEditMess(item)}
+                              className="border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                            >
+                              <Edit className="w-3.5 h-3.5" /> {t('Config', 'কনফিগ')}
+                            </button>
 
-                        <button
-                          onClick={() => handleEnterMess(item.id)}
-                          className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-all"
-                        >
-                          <UserCheck className="w-3.5 h-3.5" /> {t('Login As', 'প্রবেশ')}
-                        </button>
+                            <button
+                              onClick={() => handleEnterMess(item.id)}
+                              className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                            >
+                              <UserCheck className="w-3.5 h-3.5" /> {t('Login As', 'প্রবেশ')}
+                            </button>
 
-                        <button
-                          onClick={() => handleWipeMess(item)}
-                          className="bg-red-50 hover:bg-red-100 text-red-700 font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer border border-red-100 transition-all"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> {t('Wipe Out', 'মুছুন')}
-                        </button>
+                            <button
+                              onClick={() => handleWipeMess(item)}
+                              className="bg-red-50 hover:bg-red-100 text-red-700 font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer border border-red-100 transition-all"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" /> {t('Wipe Out', 'মুছুন')}
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
