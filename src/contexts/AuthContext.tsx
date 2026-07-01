@@ -24,10 +24,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [currentMess, setCurrentMess] = useState<Mess | null>(null);
-  const [managedMesses, setManagedMesses] = useState<Mess[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
+    const cached = localStorage.getItem('cachedUserProfile');
+    return cached ? JSON.parse(cached) : null;
+  });
+  const [currentMess, setCurrentMess] = useState<Mess | null>(() => {
+    const cached = localStorage.getItem('cachedCurrentMess');
+    return cached ? JSON.parse(cached) : null;
+  });
+  const [managedMesses, setManagedMesses] = useState<Mess[]>(() => {
+    const cached = localStorage.getItem('cachedManagedMesses');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [loading, setLoading] = useState(() => {
+    return localStorage.getItem('cachedUserProfile') ? false : true;
+  });
   const [hasEntered, setHasEnteredState] = useState(() => {
     return localStorage.getItem('hasEntered') === 'true';
   });
@@ -40,7 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfileAndMess = async (uid: string) => {
     try {
       const userRef = doc(db, 'users', uid);
-      const userSnap = await getDoc(userRef);
+      const messesRef = collection(db, 'messes');
+      const qManagers = query(messesRef, where('managerIds', 'array-contains', uid));
+
+      // Fetch user profile and managed messes in parallel!
+      const [userSnap, managedSnap] = await Promise.all([
+        getDoc(userRef),
+        getDocs(qManagers)
+      ]);
       
       let profile: UserProfile | null = null;
       if (userSnap.exists()) {
@@ -48,57 +66,72 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile.id = userSnap.id;
       }
 
-      // Always fetch all messes user manages, regardless of current active site
-      const messesRef = collection(db, 'messes');
-      const qManagers = query(messesRef, where('managerIds', 'array-contains', uid));
-      const managedSnap = await getDocs(qManagers);
       let managed = managedSnap.docs.map(d => ({ id: d.id, ...d.data() } as Mess));
 
-      // Also fetch by legacy managerId if role is Manager
+      // Build parallel list for remaining secondary checks
+      const secondaryRequests = [];
+      let legacyIdx = -1;
       if (profile?.role === 'Manager') {
         const qLegacy = query(messesRef, where('managerId', '==', uid));
-        const legacySnap = await getDocs(qLegacy);
-        legacySnap.docs.forEach(doc => {
-           if (!managed.find(m => m.id === doc.id)) {
-              managed.push({ id: doc.id, ...doc.data() } as Mess);
-           }
-        });
+        legacyIdx = secondaryRequests.push(getDocs(qLegacy)) - 1;
       }
 
-      // Also check messIds array in profile to ensure all belonging messes are loaded
+      let missingChunks: string[][] = [];
+      let missingChunkIndices: number[] = [];
       if (profile?.messIds && profile.messIds.length > 0) {
         const missingIds = profile.messIds.filter(id => !managed.find(m => m.id === id));
-        if (missingIds.length > 0) {
-           // Fetch the specific missing messes (limit to 10 at a time for 'in' query)
-           for (let i = 0; i < missingIds.length; i += 10) {
-              const chunk = missingIds.slice(i, i + 10);
-              const qMore = query(messesRef, where(documentId(), 'in', chunk));
-              const moreSnap = await getDocs(qMore);
-              moreSnap.docs.forEach(doc => {
-                 if (!managed.find(m => m.id === doc.id)) {
-                    managed.push({ id: doc.id, ...doc.data() } as Mess);
-                 }
-              });
-           }
+        for (let i = 0; i < missingIds.length; i += 10) {
+          const chunk = missingIds.slice(i, i + 10);
+          missingChunks.push(chunk);
+          const qMore = query(messesRef, where(documentId(), 'in', chunk));
+          missingChunkIndices.push(secondaryRequests.push(getDocs(qMore)) - 1);
         }
       }
 
-      // Fetch current active mess
+      let activeMessFetchIdx = -1;
+      if (profile && profile.messId) {
+        const activeManaged = managed.find(m => m.id === profile.messId);
+        if (!activeManaged) {
+          const messRef = doc(db, 'messes', profile.messId);
+          activeMessFetchIdx = secondaryRequests.push(getDoc(messRef)) - 1;
+        }
+      }
+
+      // Resolve secondary queries concurrently
+      const secondaryResults = await Promise.all(secondaryRequests);
+
+      if (legacyIdx !== -1) {
+        const legacySnap = secondaryResults[legacyIdx] as any;
+        legacySnap.docs.forEach((doc: any) => {
+          if (!managed.find(m => m.id === doc.id)) {
+            managed.push({ id: doc.id, ...doc.data() } as Mess);
+          }
+        });
+      }
+
+      missingChunkIndices.forEach((queryIdx) => {
+        const moreSnap = secondaryResults[queryIdx] as any;
+        moreSnap.docs.forEach((doc: any) => {
+          if (!managed.find(m => m.id === doc.id)) {
+            managed.push({ id: doc.id, ...doc.data() } as Mess);
+          }
+        });
+      });
+
       let activeMess: Mess | null = null;
       if (profile) {
         if (profile.messId) {
-           const activeManaged = managed.find(m => m.id === profile.messId);
-           if (activeManaged) {
-             activeMess = activeManaged;
-           } else {
-             const messRef = doc(db, 'messes', profile.messId);
-             const messSnap = await getDoc(messRef);
-             if (messSnap.exists()) {
-                activeMess = { id: messSnap.id, ...messSnap.data() } as Mess;
-             }
-           }
+          const activeManaged = managed.find(m => m.id === profile.messId);
+          if (activeManaged) {
+            activeMess = activeManaged;
+          } else if (activeMessFetchIdx !== -1) {
+            const messSnap = secondaryResults[activeMessFetchIdx] as any;
+            if (messSnap.exists()) {
+              activeMess = { id: messSnap.id, ...messSnap.data() } as Mess;
+            }
+          }
         } else if (managed.length > 0) {
-           activeMess = managed[0];
+          activeMess = managed[0];
         }
       }
 
@@ -106,6 +139,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserProfile(profile);
       setManagedMesses(managed);
       setCurrentMess(activeMess);
+
+      // Save to localStorage cache
+      if (profile) {
+        localStorage.setItem('cachedUserProfile', JSON.stringify(profile));
+      }
+      if (activeMess) {
+        localStorage.setItem('cachedCurrentMess', JSON.stringify(activeMess));
+      } else {
+        localStorage.removeItem('cachedCurrentMess');
+      }
+      localStorage.setItem('cachedManagedMesses', JSON.stringify(managed));
     } catch (err) {
       console.error("Error fetching profile", err);
     }
@@ -150,6 +194,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserProfile(null);
       setCurrentMess(null);
       setManagedMesses([]);
+      localStorage.removeItem('cachedUserProfile');
+      localStorage.removeItem('cachedCurrentMess');
+      localStorage.removeItem('cachedManagedMesses');
+      localStorage.removeItem('hasEntered');
     } catch (error) {
       console.error("Error signing out", error);
     }
