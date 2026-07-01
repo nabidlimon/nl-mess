@@ -15,7 +15,7 @@ import {
 
 export default function AuthorityPanel() {
   const navigate = useNavigate();
-  const { userProfile, isSupreme } = useAuth();
+  const { userProfile, isSupreme, refreshProfile, setHasEntered } = useAuth();
   const { language } = useLanguage();
 
   const [messes, setMesses] = useState<Mess[]>([]);
@@ -198,6 +198,8 @@ export default function AuthorityPanel() {
       });
       
       localStorage.setItem('hasEntered', 'true');
+      setHasEntered(true);
+      await refreshProfile();
       alert(t(`Masquerading as Manager for Mess ID ${messId}.`, `উক্ত মেস আইডির ম্যানেজার হিসেবে মেসে প্রবেশ করা হচ্ছে।`));
       navigate('/dashboard');
     } catch (err) {
