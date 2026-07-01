@@ -851,8 +851,8 @@ export default function Dashboard() {
 
       {/* Notice Reader Drawer/Modal */}
       {selectedNotice && (
-         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-scale-up border border-slate-105 dark:border-slate-800">
+         <div onClick={() => setSelectedNotice(null)} className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+            <div onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-scale-up border border-slate-105 dark:border-slate-800">
                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
                   <div className="flex items-center gap-2">
                      <span className="p-1.5 bg-blue-100/60 dark:bg-blue-950/30 rounded-lg text-blue-600 dark:text-blue-400">
