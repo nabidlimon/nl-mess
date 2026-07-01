@@ -113,13 +113,21 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RoutesConfig() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, loading } = useAuth();
+
+  // Smart root: show loader while auth resolves, redirect logged-in users to dashboard
+  const SmartRoot = () => {
+    if (loading) return <AppLoadingScreen />;
+    if (user) return <Navigate to="/dashboard" replace />;
+    return <LandingPage />;
+  };
+
   return (
     <Routes>
       <Route path="/login" element={(user || userProfile) ? <Navigate to="/dashboard" replace /> : <Login />} />
       
-      {/* Public Landing Page */}
-      <Route path="/" element={<LandingPage />} />
+      {/* Smart Landing Page: loader → redirect to dashboard if logged in, else show page */}
+      <Route path="/" element={<SmartRoot />} />
 
       {/* Protected Routes */}
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />

@@ -110,7 +110,7 @@ export default function Onboarding() {
       
       await refreshProfile();
       setHasEntered(true);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       console.error("Error switching mess", err);
     } finally {
@@ -188,7 +188,7 @@ export default function Onboarding() {
       
       await refreshProfile();
       setHasEntered(true);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       console.error(err);
     } finally {
@@ -259,7 +259,7 @@ export default function Onboarding() {
 
       await refreshProfile();
       setHasEntered(true);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       console.error(err);
     } finally {
@@ -645,7 +645,7 @@ export default function Onboarding() {
                 </p>
                 
                 <button 
-                  onClick={() => { setHasEntered(true); navigate('/'); }}
+                  onClick={() => { setHasEntered(true); navigate('/dashboard'); }}
                   className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-blue-500/10 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>Enter Dashboard</span>
