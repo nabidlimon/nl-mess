@@ -28,7 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentMess, setCurrentMess] = useState<Mess | null>(null);
   const [managedMesses, setManagedMesses] = useState<Mess[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hasEntered, setHasEntered] = useState(false);
+  const [hasEntered, setHasEnteredState] = useState(() => {
+    return localStorage.getItem('hasEntered') === 'true';
+  });
+  const setHasEntered = (val: boolean) => {
+    localStorage.setItem('hasEntered', val ? 'true' : 'false');
+    setHasEnteredState(val);
+  };
   const isSupreme = user?.email === 'nabidahamed2003@gmail.com' || userProfile?.email === 'nabidahamed2003@gmail.com';
 
   const fetchProfileAndMess = async (uid: string) => {

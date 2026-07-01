@@ -56,7 +56,7 @@ export function LogoIcon({ size = 32, className, ...props }: LogoIconProps) {
       </defs>
 
       {/* Dark Gradient Background squircle */}
-      <rect width="100" height="100" rx="26" fill="url(#bgGrad)" />
+      <rect width="100" height="100" rx="26" fill={`url(#${bgGradId})`} />
       <rect x="2" y="2" width="96" height="96" rx="24" stroke="white" strokeWidth="1.5" strokeOpacity="0.1" fill="none" />
 
       {/* Soft backglow */}

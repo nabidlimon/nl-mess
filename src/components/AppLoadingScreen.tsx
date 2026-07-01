@@ -41,7 +41,10 @@ export function AppLoadingScreen() {
         </h1>
         
         <div className="w-[120px] h-[3px] bg-slate-800 rounded-full mt-3.5 mx-auto overflow-hidden relative">
-          <div className="absolute left-0 h-full w-[50px] bg-gradient-to-r from-cyan-500 to-violet-500 rounded-full animate-[loadingBar_1.5s_ease-in-out_infinite]" />
+          <div 
+            className="absolute left-0 h-full w-[50px] bg-gradient-to-r from-cyan-500 to-violet-500 rounded-full" 
+            style={{ animation: 'loadingBar 1.5s ease-in-out infinite' }}
+          />
         </div>
       </div>
 
