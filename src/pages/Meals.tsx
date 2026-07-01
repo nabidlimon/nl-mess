@@ -3,7 +3,7 @@ import { collection, query, onSnapshot, writeBatch, doc, where, orderBy, serverT
 import { db } from '../lib/firebase';
 import { Member, Meal } from '../types';
 import { Save, ChevronLeft, ChevronRight, Check, X, Clock, AlertCircle, Users } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, getDaysInMonth, addMonths, subMonths, parse } from 'date-fns';
+import { format, startOfMonth, endOfMonth, getDaysInMonth, addMonths, subMonths, parse, addDays } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useMonth } from '../contexts/MonthContext';
@@ -358,7 +358,8 @@ export default function Meals() {
     if (mealMap[key]) return mealMap[key].displayValue || (mealMap[key].mealCount > 0 ? String(mealMap[key].mealCount) : '');
     
     const todayStr = format(new Date(), 'yyyy-MM-dd');
-    if (dateStr >= todayStr) {
+    const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+    if (dateStr === todayStr || dateStr === tomorrowStr) {
       // Fallback: search backwards for the latest explicit meal record of this member before dateStr
       const latest = meals
         .filter(m => m.memberId === memberId && m.date < dateStr)
@@ -378,9 +379,10 @@ export default function Meals() {
     if (mealMap[key]) return false;
     
     const todayStr = format(new Date(), 'yyyy-MM-dd');
-    if (dateStr < todayStr) return false;
+    const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+    if (dateStr === todayStr || dateStr === tomorrowStr) return true;
     
-    return true;
+    return false;
   };
 
   const parseComputedTotal = (valueStr: string | number) => {
@@ -418,7 +420,8 @@ export default function Meals() {
       // Look up effective meal document (explicit or inherited)
       let mDoc = mealMap[key];
       const todayStr = format(new Date(), 'yyyy-MM-dd');
-      if (!mDoc && dateStr >= todayStr) {
+      const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+      if (!mDoc && (dateStr === todayStr || dateStr === tomorrowStr)) {
         const latest = meals
           .filter(x => x.memberId === m.id && x.date < dateStr)
           .sort((a, b) => b.date.localeCompare(a.date))[0];

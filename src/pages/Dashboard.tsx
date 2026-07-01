@@ -195,6 +195,7 @@ export default function Dashboard() {
     const currentMonthDate = parse(monthStr, 'yyyy-MM', new Date());
     const daysInMonth = getDaysInMonth(currentMonthDate);
     const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
     let total = 0;
     
     for (let day = 1; day <= daysInMonth; day++) {
@@ -202,7 +203,7 @@ export default function Dashboard() {
       const exact = meals.find(m => m.memberId === memberId && m.date === dateStr);
       if (exact) {
         total += exact.mealCount || 0;
-      } else if (dateStr >= todayStr) {
+      } else if (dateStr === todayStr || dateStr === tomorrowStr) {
         const latest = meals
           .filter(m => m.memberId === memberId && m.date < dateStr)
           .sort((a, b) => b.date.localeCompare(a.date))[0];
@@ -330,9 +331,10 @@ export default function Dashboard() {
     const dayMeals = activeMembers.reduce((sum, member) => {
       const exact = meals.find(m => m.memberId === member.id && m.date === dateStr);
       const todayStr = format(new Date(), 'yyyy-MM-dd');
+      const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
       if (exact) {
         return sum + (exact.mealCount || 0);
-      } else if (dateStr >= todayStr) {
+      } else if (dateStr === todayStr || dateStr === tomorrowStr) {
         const latest = meals
           .filter(m => m.memberId === member.id && m.date < dateStr)
           .sort((a, b) => b.date.localeCompare(a.date))[0];

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { collection, query, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Member, Meal, Deposit, BazarCost } from '../types';
-import { format, parse, getDaysInMonth } from 'date-fns';
+import { format, parse, getDaysInMonth, addDays } from 'date-fns';
 import { Download, FileText, Image as ImageIcon } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { toPng } from 'html-to-image';
@@ -54,6 +54,7 @@ export default function Settlement() {
     const currentMonthDate = parse(monthStr, 'yyyy-MM', new Date());
     const daysInMonth = getDaysInMonth(currentMonthDate);
     const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
     let total = 0;
     
     for (let day = 1; day <= daysInMonth; day++) {
@@ -61,7 +62,7 @@ export default function Settlement() {
       const exact = meals.find(m => m.memberId === memberId && m.date === dateStr);
       if (exact) {
         total += exact.mealCount || 0;
-      } else if (dateStr >= todayStr) {
+      } else if (dateStr === todayStr || dateStr === tomorrowStr) {
         const latest = meals
           .filter(m => m.memberId === memberId && m.date < dateStr)
           .sort((a, b) => b.date.localeCompare(a.date))[0];
