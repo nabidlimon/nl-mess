@@ -3,13 +3,16 @@ import { LogoIcon } from './Logo';
 
 export function AppLoadingScreen() {
   return (
-    <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center font-sans z-[99999]">
+    <div 
+      className="fixed inset-0 flex flex-col items-center justify-center font-sans z-[99999]"
+      style={{ backgroundColor: '#0b0f19' }}
+    >
       <div className="relative mb-6 w-[84px] h-[84px]">
         {/* Glowing rotating loader ring */}
         <svg 
-          className="absolute -top-2 -left-2 w-[100px] h-[100px] animate-spin" 
+          className="absolute -top-2 -left-2 w-[100px] h-[100px]" 
           viewBox="0 0 100 100"
-          style={{ animationDuration: '2s' }}
+          style={{ animation: 'instantSpin 2s linear infinite' }}
         >
           <circle 
             cx="50" 
@@ -52,6 +55,10 @@ export function AppLoadingScreen() {
         @keyframes loadingBar {
           0% { left: -50px; }
           100% { left: 120px; }
+        }
+        @keyframes instantSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>

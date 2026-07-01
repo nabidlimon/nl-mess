@@ -206,8 +206,8 @@ export default function Dashboard() {
         total += exact.mealCount || 0;
       } else if (dateStr === todayStr || dateStr === tomorrowStr) {
         const latest = meals
-          .filter(m => m.memberId === memberId && m.date < dateStr)
-          .sort((a, b) => b.date.localeCompare(a.date))[0];
+          .filter(m => m.memberId === memberId && m.date && m.date < dateStr)
+          .sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
         if (latest) {
           total += latest.mealCount || 0;
         }
@@ -393,8 +393,8 @@ export default function Dashboard() {
         return sum + (exact.mealCount || 0);
       } else if (dateStr === todayStr || dateStr === tomorrowStr) {
         const latest = meals
-          .filter(m => m.memberId === member.id && m.date < dateStr)
-          .sort((a, b) => b.date.localeCompare(a.date))[0];
+          .filter(m => m.memberId === member.id && m.date && m.date < dateStr)
+          .sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
         return sum + (latest ? (latest.mealCount || 0) : 0);
       }
       return sum;
