@@ -409,7 +409,7 @@ export default function Onboarding() {
 
                 <div className="pt-4 flex gap-3">
                   <button 
-                    onClick={() => setStep('selection')}
+                    onClick={() => setStep(managedMesses.length > 0 ? 'manager_choice' : 'selection')}
                     className="flex-1 py-3.5 border border-slate-700 hover:bg-slate-800 text-slate-300 rounded-2xl font-bold text-sm transition-all cursor-pointer text-center"
                   >
                     {t('onboarding.back')}
@@ -500,7 +500,7 @@ export default function Onboarding() {
 
                 <div className="pt-4 flex gap-3">
                   <button 
-                    onClick={() => setStep('selection')}
+                    onClick={() => setStep(managedMesses.length > 0 ? 'manager_choice' : 'selection')}
                     className="flex-1 py-3.5 border border-slate-700 hover:bg-slate-800 text-slate-300 rounded-2xl font-bold text-sm transition-all cursor-pointer text-center"
                   >
                     {t('onboarding.back')}
