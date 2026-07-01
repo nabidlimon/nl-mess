@@ -213,6 +213,31 @@ export default function Dashboard() {
   const isMealManager = userProfile?.role === 'MealManager';
   const isAdmin = isOverallManager || isMealManager;
 
+  // Today's Mess Overview stats (Manager view)
+  const todayDateStr = format(new Date(), 'yyyy-MM-dd');
+  const todayMeals = meals.filter(m => m.date === todayDateStr);
+  const todayBazarCost = costs.filter(c => c.date === todayDateStr).reduce((sum, c) => sum + c.totalPrice, 0);
+
+  const todayOwnBreakfast = todayMeals.filter(m => m.morning).length;
+  const todayOwnLunch = todayMeals.filter(m => m.lunch).length;
+  const todayOwnDinner = todayMeals.filter(m => m.dinner).length;
+
+  const todayGuestBreakfast = todayMeals.reduce((sum, m) => sum + (m.guestMorning || 0), 0);
+  const todayGuestLunch = todayMeals.reduce((sum, m) => sum + (m.guestLunch || 0), 0);
+  const todayGuestDinner = todayMeals.reduce((sum, m) => sum + (m.guestDinner || 0), 0);
+
+  const totalBreakfastPlates = todayOwnBreakfast + todayGuestBreakfast;
+  const totalLunchPlates = todayOwnLunch + todayGuestLunch;
+  const totalDinnerPlates = todayOwnDinner + todayGuestDinner;
+
+  const totalGuestMealsToday = todayGuestBreakfast + todayGuestLunch + todayGuestDinner;
+
+  const totalOwnMealsTodayCount = (todayOwnBreakfast * 0.5) + todayOwnLunch + todayOwnDinner;
+  const totalGuestMealsTodayCount = (todayGuestBreakfast * 0.5) + todayGuestLunch + todayGuestDinner;
+  const totalMealsTodayCount = totalOwnMealsTodayCount + totalGuestMealsTodayCount;
+
+  const todayMealRate = totalMealsTodayCount > 0 ? todayBazarCost / totalMealsTodayCount : 0;
+
   const pendingAdmissions = members.filter(m => m.status === 'Pending');
   const pendingGuestMeals = meals.filter(m => 
     (m.pendingGuestMorning && m.pendingGuestMorning > 0) ||
@@ -373,6 +398,107 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Today's Mess Overview (Manager View) */}
+      {isAdmin && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm transition-all duration-200">
+          <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-805 pb-4 mb-5">
+            <span className="p-2.5 bg-blue-50 dark:bg-blue-955/30 border border-blue-100 dark:border-blue-900/50 rounded-2xl text-blue-600 dark:text-blue-400">
+              <ClipboardCheck className="w-5 h-5" />
+            </span>
+            <div>
+              <h3 className="text-base font-black text-slate-900 dark:text-white">
+                {language === 'bn' ? 'আজকের মেস ওভারভিউ (ম্যানেজার)' : 'Today\'s Mess Overview (Manager)'}
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                {language === 'bn' 
+                  ? 'আজকের সক্রিয় মিল সমূহ, অতিথি মিল এবং বাজার খরচের হিসাব।' 
+                  : 'Real-time breakfast, lunch, dinner, guest allocations and daily costs.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {/* Breakfast Plates */}
+            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+                {language === 'bn' ? 'সকালের মিল' : 'Breakfast'}
+              </span>
+              <h4 className="text-2xl font-black text-slate-900 dark:text-white font-display">
+                {totalBreakfastPlates} <span className="text-xs text-slate-405 font-normal">{language === 'bn' ? 'জন' : 'plates'}</span>
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-1 font-bold">
+                {language === 'bn' ? `বর্ডার: ${todayOwnBreakfast} • গেস্ট: ${todayGuestBreakfast}` : `Own: ${todayOwnBreakfast} • Guest: ${todayGuestBreakfast}`}
+              </p>
+            </div>
+
+            {/* Lunch Plates */}
+            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+                {language === 'bn' ? 'দুপুরের মিল' : 'Lunch'}
+              </span>
+              <h4 className="text-2xl font-black text-slate-900 dark:text-white font-display">
+                {totalLunchPlates} <span className="text-xs text-slate-405 font-normal">{language === 'bn' ? 'জন' : 'plates'}</span>
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-1 font-bold">
+                {language === 'bn' ? `বর্ডার: ${todayOwnLunch} • গেস্ট: ${todayGuestLunch}` : `Own: ${todayOwnLunch} • Guest: ${todayGuestLunch}`}
+              </p>
+            </div>
+
+            {/* Dinner Plates */}
+            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+                {language === 'bn' ? 'রাতের মিল' : 'Dinner'}
+              </span>
+              <h4 className="text-2xl font-black text-slate-900 dark:text-white font-display">
+                {totalDinnerPlates} <span className="text-xs text-slate-405 font-normal">{language === 'bn' ? 'জন' : 'plates'}</span>
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-1 font-bold">
+                {language === 'bn' ? `বর্ডার: ${todayOwnDinner} • গেস্ট: ${todayGuestDinner}` : `Own: ${todayOwnDinner} • Guest: ${todayGuestDinner}`}
+              </p>
+            </div>
+
+            {/* Guest Meals */}
+            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+                {language === 'bn' ? 'মোট গেস্ট মিল' : 'Guest Meals'}
+              </span>
+              <h4 className="text-2xl font-black text-slate-900 dark:text-white font-display">
+                {totalGuestMealsToday} <span className="text-xs text-slate-405 font-normal">{language === 'bn' ? 'টি' : 'meals'}</span>
+              </h4>
+              <p className="text-[10px] text-slate-450 dark:text-slate-500 mt-1 font-bold leading-none">
+                {language === 'bn' ? 'অনুমোদিত গেস্ট মিল' : 'Active guest plates today'}
+              </p>
+            </div>
+
+            {/* Today's Bazar Cost */}
+            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+                {language === 'bn' ? 'আজকের বাজার' : 'Today\'s Bazar'}
+              </span>
+              <h4 className="text-2xl font-black text-slate-900 dark:text-white font-display">
+                {todayBazarCost} <span className="text-xs text-slate-405 font-normal">{t('common.currency')}</span>
+              </h4>
+              <p className="text-[10px] text-slate-450 dark:text-slate-500 mt-1 font-bold">
+                {language === 'bn' ? 'আজকের বাজার খরচ' : 'Daily expenses total'}
+              </p>
+            </div>
+
+            {/* Today's Meal Rate */}
+            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+                {language === 'bn' ? 'আজকের রেট' : 'Today\'s Rate'}
+              </span>
+              <h4 className="text-2xl font-black text-indigo-600 dark:text-indigo-400 font-display">
+                {todayMealRate.toFixed(1)} <span className="text-xs text-slate-405 font-normal">{t('common.currency')}</span>
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-1 font-bold">
+                {language === 'bn' ? `মোট মিল: ${totalMealsTodayCount.toFixed(1)}` : `Meals count: ${totalMealsTodayCount.toFixed(1)}`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* My Passbook Widget */}
