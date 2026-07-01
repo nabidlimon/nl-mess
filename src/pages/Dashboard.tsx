@@ -852,8 +852,8 @@ export default function Dashboard() {
       {/* Notice Reader Drawer/Modal */}
       {selectedNotice && (
          <div onClick={() => setSelectedNotice(null)} className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-            <div onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-scale-up border border-slate-105 dark:border-slate-800">
-               <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+            <div onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-scale-up border border-slate-100 dark:border-slate-800 flex flex-col max-h-[80vh]">
+               <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
                   <div className="flex items-center gap-2">
                      <span className="p-1.5 bg-blue-100/60 dark:bg-blue-950/30 rounded-lg text-blue-600 dark:text-blue-400">
                         <Megaphone className="w-4 h-4" />
@@ -869,7 +869,7 @@ export default function Dashboard() {
                      <X className="w-4 h-4" />
                   </button>
                </div>
-               <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+               <div className="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
                   <div>
                      <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight">{selectedNotice.title}</h3>
                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold mt-2">
