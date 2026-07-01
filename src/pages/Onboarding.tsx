@@ -5,7 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { db } from '../lib/firebase';
 import { doc, setDoc, updateDoc, collection, query, getDocs, where } from 'firebase/firestore';
 import { Mess, UserProfile, Notification } from '../types';
-import { LogOut, Home, Users, Plus, Search, CheckCircle, ArrowRight, ShieldCheck, User as UserIcon } from 'lucide-react';
+import { LogOut, Home, Users, Plus, Search, CheckCircle, ArrowRight, ShieldCheck, User as UserIcon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LogoIcon } from '../components/Logo';
 
@@ -347,11 +347,60 @@ export default function Onboarding() {
 
               <button 
                 onClick={logout}
-                className="mt-2 flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 font-bold transition-colors py-3 cursor-pointer text-sm"
+                className="mt-2 flex items-center justify-center gap-2 text-slate-400 hover:text-slate-200 font-bold transition-colors py-3 cursor-pointer text-sm w-fit mx-auto"
               >
                 <LogOut className="w-4 h-4" />
                 {t('nav.sign_out')}
               </button>
+
+              {/* Guest / Visitor Quick Guide Banner */}
+              <div className="bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-slate-900/40 border border-blue-500/20 p-5 rounded-3xl relative overflow-hidden mt-4">
+                <div className="flex gap-4 items-start relative z-10">
+                  <div className="p-2.5 bg-blue-500/20 text-blue-400 rounded-2xl shrink-0 border border-blue-500/20 animate-pulse">
+                     <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white mb-1">
+                      {language === 'bn' ? 'মেসের ফিচারসমূহ দেখতে চান?' : 'Want to preview the features?'}
+                    </h4>
+                    <p className="text-xs text-slate-300 leading-relaxed font-semibold">
+                      {language === 'bn' 
+                        ? 'সরাসরি ড্যাশবোর্ড এবং সমস্ত ফিচার রিয়েল-টাইমে পরখ করতে "নতুন মেসে যুক্ত হন" অপশনে ক্লিক করে "Nanolez" লিখে সার্চ করুন এবং যুক্ত হন (কোনো ম্যানেজার অনুমোদনের প্রয়োজন নেই)।'
+                        : 'To view the live dashboard and try out all features immediately, click "Join Another Mess", search for "Nanolez", and select it for instant approval-free access.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* System Essentials Checklist */}
+              <div className="bg-slate-900/20 border border-slate-800/80 p-5 rounded-3xl mt-4">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                   {language === 'bn' ? 'মেস সিস্টেমের প্রয়োজনীয় নিয়মসমূহ' : 'System Essentials & Rules'}
+                </h4>
+                <ul className="space-y-3 text-xs text-slate-350 font-semibold">
+                  <li className="flex gap-2.5 items-start">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                    <span>
+                      <strong>{language === 'bn' ? 'মোবাইল নম্বর:' : 'Phone Number:'}</strong>{' '}
+                      {language === 'bn' ? 'মেসে যুক্ত হতে বা নতুন মেস তৈরি করতে সচল মোবাইল নম্বর দিতে হবে।' : 'A valid phone number is required to join a mess or create a new one.'}
+                    </span>
+                  </li>
+                  <li className="flex gap-2.5 items-start">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                    <span>
+                      <strong>{language === 'bn' ? 'মিল লক সময়সীমা (রাত ১০টা):' : 'Meal Lock Deadline (10:00 PM):'}</strong>{' '}
+                      {language === 'bn' ? 'ঝাবেলা এড়াতে পরবর্তী দিনের মিল সেটিং রাত ১০টার পূর্বে আপডেট করতে হবে।' : 'Tomorrow\'s meal count must be updated before 10:00 PM of the current day.'}
+                    </span>
+                  </li>
+                  <li className="flex gap-2.5 items-start">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                    <span>
+                      <strong>{language === 'bn' ? 'ডিপোজিট অনুমোদন:' : 'Deposit Verification:'}</strong>{' '}
+                      {language === 'bn' ? 'বোর্ডারদের জমা দেওয়া ডিপোজিট ম্যানেজার অনুমোদন করার পর তাদের ড্যাশবোর্ডে যুক্ত হবে।' : 'Deposits submitted by borders are verified by managers before updating in the digital ledger.'}
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </motion.div>
           )}
 
