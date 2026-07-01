@@ -151,20 +151,23 @@ function RoutesConfig() {
 }
 
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AppErrorBoundary } from './components/AppErrorBoundary';
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <MonthProvider>
-            <Router>
-              <RoutesConfig />
-            </Router>
-          </MonthProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+    <AppErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <MonthProvider>
+              <Router>
+                <RoutesConfig />
+              </Router>
+            </MonthProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </AppErrorBoundary>
   );
 }
 
