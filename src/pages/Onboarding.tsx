@@ -8,6 +8,7 @@ import { Mess, UserProfile, Notification } from '../types';
 import { LogOut, Home, Users, Plus, Search, CheckCircle, ArrowRight, ShieldCheck, User as UserIcon, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LogoIcon } from '../components/Logo';
+import { AppLoadingScreen } from '../components/AppLoadingScreen';
 
 export default function Onboarding() {
   const { user, userProfile, managedMesses, logout, refreshProfile, setHasEntered, hasEntered } = useAuth();
@@ -30,6 +31,10 @@ export default function Onboarding() {
   const [userPhone, setUserPhone] = useState('');
 
   const [switchingMess, setSwitchingMess] = useState(false);
+
+  if (switchingMess || loading) {
+    return <AppLoadingScreen />;
+  }
   
   useEffect(() => {
     if (!user) {
