@@ -224,7 +224,7 @@ export default function ManagerPanel() {
   const totalRentReceived = activeMonthRentRecords.reduce((sum, r) => sum + Number(r.rentPaid || 0), 0);
   const totalEssentialCosts = activeMonthEssentialCosts.reduce((sum, c) => sum + Number(c.amount || 0), 0);
   const totalBazarCosts = activeMonthBazarCosts.reduce((sum, b) => sum + Number(b.totalPrice || 0), 0);
-  const totalExpenditure = totalEssentialCosts + totalBazarCosts;
+  const totalExpenditure = totalEssentialCosts;
   const netMarginalBalance = totalRentReceived - totalExpenditure;
 
   // Handle Border Select from presets to auto-fill details
@@ -436,8 +436,6 @@ export default function ManagerPanel() {
       { [language === 'bn' ? 'বিবরণ' : 'Description']: language === 'bn' ? 'মোট বরাদ্দকৃত ঘরভাড়া' : 'Total Allocated Rent', [language === 'bn' ? 'পরিমাণ/তথ্য' : 'Value']: totalRentAllocated },
       { [language === 'bn' ? 'বিবরণ' : 'Description']: language === 'bn' ? 'মোট সংগৃহীত ঘরভাড়া (Vara)' : 'Total Collected Rent (Vara)', [language === 'bn' ? 'পরিমাণ/তথ্য' : 'Value']: totalRentReceived },
       { [language === 'bn' ? 'বিবরণ' : 'Description']: language === 'bn' ? 'মোট অপরিহার্য ও ইউটিলিটি খরচ' : 'Total Essential Operating Costs', [language === 'bn' ? 'পরিমাণ/তথ্য' : 'Value']: totalEssentialCosts },
-      { [language === 'bn' ? 'বিবরণ' : 'Description']: language === 'bn' ? 'মোট বাজার খরচ' : 'Total Food Bazaar Costs', [language === 'bn' ? 'পরিমাণ/তথ্য' : 'Value']: totalBazarCosts },
-      { [language === 'bn' ? 'বিবরণ' : 'Description']: language === 'bn' ? 'মোট খরচ (অপরিহার্য + বাজার)' : 'Total Consolidated Costs', [language === 'bn' ? 'পরিমাণ/তথ্য' : 'Value']: totalExpenditure },
       { [language === 'bn' ? 'বিবরণ' : 'Description']: language === 'bn' ? 'অবশিষ্ট লাভ/মেস ব্যালেন্স' : 'Net Remaining Cash Margin', [language === 'bn' ? 'পরিমাণ/তথ্য' : 'Value']: netMarginalBalance },
     ];
     const wsSummary = XLSX.utils.json_to_sheet(summaryData);
@@ -512,8 +510,6 @@ export default function ManagerPanel() {
       [isBn ? "মোট বরাদ্দকৃত রুম ভাড়া" : "Gross Room Rent Scheduled", `${totalRentAllocated} TK`],
       [isBn ? "মোট সংগৃহীত রুম ভাড়া (আদায়)" : "Gross Room Rent Collected", `${totalRentReceived} TK`],
       [isBn ? "মোট মেস বা ইউটিলিটি অপরিহার্য খরচ" : "Total Essential Utility Expenses", `${totalEssentialCosts} TK`],
-      [isBn ? "মোট খাদ্য সামগ্রী বাজার খরচ" : "Total Food Bazar Ledger Expenses", `${totalBazarCosts} TK`],
-      [isBn ? "মোট কন্সোলিডেটেড খরচ (বাজার + অপরিহার্য)" : "Core Total Expenditure", `${totalExpenditure} TK`],
       [isBn ? "মেস ম্যানেজারের অবশিষ্টাংশ ক্যাশ ব্যালেন্স" : "Net Rent Remaining Balance", `${netMarginalBalance} TK`]
     ];
 
@@ -649,7 +645,7 @@ export default function ManagerPanel() {
       </div>
 
       {/* Numerical Summary Overview banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         
         {/* Total Collected Rent */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs relative flex flex-col justify-between overflow-hidden">
@@ -683,24 +679,6 @@ export default function ManagerPanel() {
             </h2>
             <span className="mt-2.5 block text-xs text-slate-500 font-medium">
               {language === 'bn' ? 'ইউটিলিটি, ইন্টারনেট, বাবুর্চি বেতন ইত্যাদি' : 'Utilities, wifi router, cleaners, chef'}
-            </span>
-          </div>
-        </div>
-
-        {/* Bazar Costs */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs relative flex flex-col justify-between overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">{language === 'bn' ? 'মোট মেস বাজার খরচ' : 'Monthly Bazaar Cost'}</span>
-            <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl border border-amber-100">
-              <Briefcase className="h-5 w-5" />
-            </div>
-          </div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 leading-none">
-              {totalBazarCosts} <span className="text-sm font-semibold text-slate-500">{t('common.currency')}</span>
-            </h2>
-            <span className="mt-2.5 block text-xs text-slate-500 font-medium">
-              {language === 'bn' ? 'দৈনিক বাজার খরচের মোট পরিমাণ' : 'Sum of active month daily bazaar logs'}
             </span>
           </div>
         </div>
@@ -1101,10 +1079,7 @@ export default function ManagerPanel() {
                     <span className="font-extrabold text-red-600">{totalEssentialCosts} Tk</span>
                   </div>
 
-                  <div className="flex items-center justify-between py-1 bg-amber-50/40 px-3.5 rounded-xl">
-                    <span className="text-slate-500">{language === 'bn' ? 'খাদ্য বাজার বাবদ খরচ:' : 'Consolidated Bazar Food Costs:'}</span>
-                    <span className="font-extrabold text-amber-600">{totalBazarCosts} Tk</span>
-                  </div>
+
 
                   <div className="flex items-center justify-between py-1.5 bg-slate-900 text-white px-3.5 rounded-xl font-sans mt-4">
                     <span className="font-semibold text-xs uppercase tracking-wide">{language === 'bn' ? 'মোট অবশিষ্টাংশ মেস ব্যালেন্স:' : 'Consolidated Net Balance Margin:'}</span>
