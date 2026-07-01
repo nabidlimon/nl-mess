@@ -168,26 +168,26 @@ export default function TomorrowMeal() {
     colorClass: string
   }) => {
     return (
-      <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-100 transition-all hover:bg-slate-100/50">
+      <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-850 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-950">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg bg-white shadow-sm border border-slate-100 ${colorClass}`}>
+          <div className={`p-2 rounded-lg bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 ${colorClass}`}>
             <Icon className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-semibold text-slate-800 text-sm">{label}</p>
+            <p className="font-bold text-slate-800 dark:text-slate-200 text-sm">{label}</p>
             <div className="flex items-center gap-2 mt-0.5">
               {approvedVal > 0 && (
-                <span className="text-[10px] font-bold bg-green-50 text-green-600 px-1.5 py-0.5 rounded border border-green-100">
+                <span className="text-[10px] font-bold bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded border border-green-100 dark:border-green-900/30">
                   {language === 'bn' ? 'অনুমোদিত: ' : 'Approved: '} {approvedVal}
                 </span>
               )}
               {pendingVal > 0 && (
-                <span className="text-[10px] font-bold bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded border border-amber-100 animate-pulse">
+                <span className="text-[10px] font-bold bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded border border-amber-100 dark:border-amber-900/30 animate-pulse">
                   {language === 'bn' ? 'অপেক্ষমান: ' : 'Pending: '} {pendingVal}
                 </span>
               )}
               {approvedVal === 0 && pendingVal === 0 && (
-                <span className="text-[10px] text-slate-400 font-medium">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold">
                   {language === 'bn' ? 'কোনো অতিথি নেই' : 'No guest meals'}
                 </span>
               )}
@@ -202,21 +202,21 @@ export default function TomorrowMeal() {
             disabled={pendingVal <= 0 && approvedVal <= 0}
             className={`w-7.5 h-7.5 rounded-lg flex items-center justify-center border transition-all ${
               pendingVal > 0 || approvedVal > 0 
-                ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm active:scale-90' 
-                : 'bg-slate-100/50 border-transparent text-slate-300 cursor-not-allowed'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-850 text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer shadow-sm active:scale-90' 
+                : 'bg-slate-100/50 dark:bg-slate-950/30 border-transparent text-slate-300 dark:text-slate-705 cursor-not-allowed'
             }`}
           >
             <Minus className="w-4.5 h-4.5" />
           </button>
-          <span className="w-5 text-center font-mono font-bold text-slate-800 text-base">{approvedVal + pendingVal}</span>
+          <span className="w-5 text-center font-mono font-bold text-slate-800 dark:text-white text-base">{approvedVal + pendingVal}</span>
           <button
             type="button"
             onClick={onIncrement}
             disabled={approvedVal + pendingVal >= 2}
             className={`w-7.5 h-7.5 rounded-lg flex items-center justify-center border transition-all ${
               approvedVal + pendingVal < 2
-                ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm active:scale-90' 
-                : 'bg-slate-100/50 border-transparent text-slate-300 cursor-not-allowed'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-850 text-slate-650 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer shadow-sm active:scale-90' 
+                : 'bg-slate-100/50 dark:bg-slate-955/30 border-transparent text-slate-300 dark:text-slate-705 cursor-not-allowed'
             }`}
           >
             <Plus className="w-4.5 h-4.5" />
@@ -228,20 +228,22 @@ export default function TomorrowMeal() {
 
   return (
     <div className="max-w-xl mx-auto space-y-6">
-      <div className="bg-white p-6 rounded-2xl border shadow-sm">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2 text-center">{t('tomorrow_meals.title')}</h1>
-        <p className="text-sm text-gray-500 mb-6 text-center">{t('tomorrow_meals.subtitle')}</p>
+      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-200">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 text-center font-display">{t('tomorrow_meals.title')}</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 text-center font-semibold">{t('tomorrow_meals.subtitle')}</p>
 
         {/* Section 1: Member's Own Meal */}
         <div className="mb-6">
-          <p className="text-sm font-bold text-slate-800 mb-3 border-b border-slate-100 pb-1.5">
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 border-b border-slate-100 dark:border-slate-800 pb-1.5">
             {language === 'bn' ? 'আমার নিজের খাবার' : 'My Own Meal'}
           </p>
           <div className="grid grid-cols-3 gap-3">
             <button
               onClick={() => setMorning(!morning)}
               className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                morning ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-slate-100 bg-white text-slate-400 hover:border-amber-200'
+                morning 
+                  ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400' 
+                  : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-400 dark:text-slate-500 hover:border-amber-200'
               }`}
             >
               <Sunrise className={`w-8 h-8 mb-2 ${morning ? 'text-amber-500' : 'text-slate-300'}`} />
@@ -251,7 +253,9 @@ export default function TomorrowMeal() {
             <button
               onClick={() => setLunch(!lunch)}
               className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                lunch ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-slate-100 bg-white text-slate-400 hover:border-orange-200'
+                lunch 
+                  ? 'border-orange-400 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400' 
+                  : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-400 dark:text-slate-500 hover:border-orange-200'
               }`}
             >
               <Sun className={`w-8 h-8 mb-2 ${lunch ? 'text-orange-500' : 'text-slate-300'}`} />
@@ -261,7 +265,9 @@ export default function TomorrowMeal() {
             <button
               onClick={() => setDinner(!dinner)}
               className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                dinner ? 'border-indigo-400 bg-indigo-50 text-indigo-700' : 'border-slate-100 bg-white text-slate-400 hover:border-indigo-200'
+                dinner 
+                  ? 'border-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400' 
+                  : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-955 text-slate-400 dark:text-slate-500 hover:border-indigo-200'
               }`}
             >
               <Moon className={`w-8 h-8 mb-2 ${dinner ? 'text-indigo-500' : 'text-slate-300'}`} />
@@ -273,13 +279,13 @@ export default function TomorrowMeal() {
 
         {/* Section 2: Guest Meals */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5 mb-3">
+          <div className="flex items-center gap-2 border-b border-slate-105 dark:border-slate-800 pb-1.5 mb-3">
             <Users className="w-4 h-4 text-indigo-500" />
-            <p className="text-sm font-bold text-slate-800">
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
               {language === 'bn' ? 'অতিথি খাবার (Guest Meals)' : 'Guest Meals'}
             </p>
           </div>
-          <p className="text-xs text-slate-400 mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100/50">
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4 bg-slate-50 dark:bg-slate-950/30 p-2.5 rounded-xl border border-slate-100/50 dark:border-slate-850">
             ℹ️ {language === 'bn' 
               ? 'গেস্ট মিল বুকিং করার পর মিল ম্যানেজারের অনুমোদন প্রয়োজন হবে। প্রতিটি বেলাতে সর্বোচ্চ ২টি গেস্ট মিল বুকিং করা যাবে।' 
               : 'Guest meals require manual approval. At most 2 guest meals can be requested per time period.'}
@@ -319,13 +325,13 @@ export default function TomorrowMeal() {
         <button
           onClick={handleUpdate}
           disabled={loading}
-          className="w-full bg-slate-900 text-white font-medium py-3 rounded-xl hover:bg-slate-800 transition cursor-pointer flex items-center justify-center gap-2"
+          className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition cursor-pointer flex items-center justify-center gap-2"
         >
           {loading ? t('common.saving') : t('tomorrow_meals.update_btn')}
         </button>
 
         {success && (
-          <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-lg flex items-center justify-center gap-2 text-sm font-medium">
+          <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 rounded-lg flex items-center justify-center gap-2 text-sm font-medium border border-transparent dark:border-green-900/30">
             <Check className="w-4 h-4" />
             {t('tomorrow_meals.success')}
           </div>

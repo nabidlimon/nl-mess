@@ -150,3 +150,105 @@ input[type="number"] {
 .sidebar-nav-item:hover .sidebar-tooltip {
   opacity: 1;
 }
+
+/* ==========================================================================
+   GLOBAL DARK MODE OVERRIDES & DESIGN HARMONIZATION
+   Resolves theme mismatch & visual psychology gaps under dark mode.
+   ========================================================================== */
+.dark body {
+  background-color: #0b0f19;
+  color: #f8fafc;
+}
+
+.dark .bg-white {
+  background-color: #111827 !important; /* deep card slate */
+}
+
+.dark .bg-slate-50 {
+  background-color: #1f2937 !important; /* header slate */
+}
+
+.dark .bg-slate-100 {
+  background-color: #111827 !important;
+}
+
+.dark .bg-slate-200 {
+  background-color: #374151 !important;
+}
+
+.dark .border-slate-100,
+.dark .border-slate-150,
+.dark .border-slate-200,
+.dark .border-slate-300,
+.dark .border-gray-200 {
+  border-color: #1f293d !important;
+}
+
+.dark .text-slate-800,
+.dark .text-slate-900,
+.dark .text-gray-900,
+.dark .text-gray-800 {
+  color: #f3f4f6 !important;
+}
+
+.dark .text-slate-500,
+.dark .text-slate-600,
+.dark .text-gray-500,
+.dark .text-gray-650,
+.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+.dark .text-slate-400,
+.dark .text-gray-400 {
+  color: #6b7280 !important;
+}
+
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-50\/50:hover,
+.dark .hover\:bg-slate-100:hover {
+  background-color: #1f2937 !important;
+}
+
+.dark .divide-slate-50 > * + *,
+.dark .divide-slate-100 > * + *,
+.dark .divide-slate-200 > * + *,
+.dark .divide-gray-200 > * + * {
+  border-color: #1f293d !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  border-color: #374151 !important;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #6366f1 !important;
+  --tw-ring-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+.dark table th {
+  background-color: #1f2937 !important;
+  color: #9ca3af !important;
+}
+
+.dark table td {
+  color: #f3f4f6 !important;
+}
+
+.dark table tr:hover {
+  background-color: rgba(31, 41, 55, 0.4) !important;
+}
+
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4) !important;
+}
