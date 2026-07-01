@@ -12,6 +12,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { AppLoadingScreen } from './components/AppLoadingScreen';
 
 import Login from './pages/Login';
+import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Onboarding from './pages/Onboarding';
 import Members from './pages/Members';
@@ -115,10 +116,13 @@ function RoutesConfig() {
   const { user, userProfile } = useAuth();
   return (
     <Routes>
-      <Route path="/login" element={(user || userProfile) ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/login" element={(user || userProfile) ? <Navigate to="/dashboard" replace /> : <Login />} />
       
+      {/* Public Landing Page */}
+      <Route path="/" element={<LandingPage />} />
+
       {/* Protected Routes */}
-      <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
       <Route path="/onboarding" element={<PrivateRoute><Onboarding /></PrivateRoute>} />
       <Route path="/members" element={<PrivateRoute><Members /></PrivateRoute>} />
       <Route path="/meals" element={<PrivateRoute><Meals /></PrivateRoute>} />
@@ -131,7 +135,7 @@ function RoutesConfig() {
       <Route path="/about" element={<PrivateRoute><About /></PrivateRoute>} />
       <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/authority" element={<PrivateRoute><AuthorityPanel /></PrivateRoute>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
     </Routes>
   );
 }

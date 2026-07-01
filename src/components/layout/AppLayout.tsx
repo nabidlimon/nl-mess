@@ -63,7 +63,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isSupremeAuthority = isSupreme || userProfile?.email === 'nabidahamed2003@gmail.com';
 
   const navItems: NavItem[] = [
-    { name: t('nav.dashboard'),                                        path: '/',              icon: LayoutDashboard,  show: true },
+    { name: t('nav.dashboard'),                                        path: '/dashboard',     icon: LayoutDashboard,  show: true },
     { name: language === 'bn' ? 'সুপ্রীম প্যানেল' : 'Platform',      path: '/authority',     icon: Shield,           show: isSupremeAuthority },
     { name: language === 'bn' ? 'মেসসমূহ' : 'My Messes',             path: '/onboarding',    icon: RefreshCcw,       show: (userProfile?.messIds?.length || 0) > 1 || managedMesses.length > 1 },
     { name: t('nav.members'),                                          path: '/members',       icon: Users,            show: isAdmin },
@@ -82,7 +82,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   // Fixed 3 bottom tabs + "More"
   const pinned = [
-    visibleNavItems.find(n => n.path === '/'),
+    visibleNavItems.find(n => n.path === '/dashboard'),
     visibleNavItems.find(n => n.path === '/meals'),
     visibleNavItems.find(n => n.path === '/profile'),
   ].filter(Boolean) as NavItem[];
@@ -93,7 +93,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   // Is any "more" item currently active?
   const moreIsActive = moreItems.some(n =>
-    n.path === '/' ? location.pathname === '/' : location.pathname.startsWith(n.path)
+    n.path === '/dashboard' ? location.pathname === '/dashboard' : location.pathname.startsWith(n.path)
   );
 
   const userRole = isSupreme
@@ -134,8 +134,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <nav className="flex-1 overflow-y-auto py-4 custom-scrollbar">
           <div className={cn('space-y-0.5', collapsed ? 'px-2' : 'px-3')}>
             {visibleNavItems.map((item) => {
-              const isActive = item.path === '/'
-                ? location.pathname === '/'
+              const isActive = item.path === '/dashboard'
+                ? location.pathname === '/dashboard'
                 : location.pathname.startsWith(item.path);
               return (
                 <NavLink
@@ -314,8 +314,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
               {/* Pinned tabs */}
               {pinned.map((item) => {
-                const isActive = item.path === '/'
-                  ? location.pathname === '/'
+                const isActive = item.path === '/dashboard'
+                  ? location.pathname === '/dashboard'
                   : location.pathname.startsWith(item.path);
                 return (
                   <NavLink
@@ -425,8 +425,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 {/* Nav links grid */}
                 <div className="px-4 pb-4 grid grid-cols-2 gap-2">
                   {moreItems.map((item) => {
-                    const isActive = item.path === '/'
-                      ? location.pathname === '/'
+                    const isActive = item.path === '/dashboard'
+                      ? location.pathname === '/dashboard'
                       : location.pathname.startsWith(item.path);
                     return (
                       <NavLink
