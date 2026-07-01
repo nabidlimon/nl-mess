@@ -31,10 +31,6 @@ export default function Onboarding() {
   const [userPhone, setUserPhone] = useState('');
 
   const [switchingMess, setSwitchingMess] = useState(false);
-
-  if (switchingMess || loading) {
-    return <AppLoadingScreen />;
-  }
   
   useEffect(() => {
     if (!user) {
@@ -55,6 +51,10 @@ export default function Onboarding() {
       setStep('selection');
     }
   }, [user, userProfile, navigate, managedMesses]);
+
+  if (switchingMess || loading) {
+    return <AppLoadingScreen />;
+  }
 
   const getMessMembership = (messId: string) => {
     // 1. If user is in managerIds of the mess:
