@@ -137,7 +137,22 @@ export default function Bazar() {
   const filteredCosts = costs.filter(c => c.date.startsWith(selectedMonth) && (c.date.includes(search) || getMemberName(c.purchasedBy).toLowerCase().includes(search.toLowerCase())));
   
   const getMealsForDay = (date: string) => {
-    return meals.filter(m => m.date === date).reduce((sum, m) => sum + (m.mealCount || 0), 0);
+    const activeMembers = members.filter(m => m.status === 'Active');
+    let total = 0;
+    activeMembers.forEach(member => {
+      const exact = meals.find(m => m.memberId === member.id && m.date === date);
+      if (exact) {
+        total += exact.mealCount || 0;
+      } else {
+        const latest = meals
+          .filter(m => m.memberId === member.id && m.date < date)
+          .sort((a, b) => b.date.localeCompare(a.date))[0];
+        if (latest) {
+          total += latest.mealCount || 0;
+        }
+      }
+    });
+    return total;
   };
 
   const currentMonthTotal = costs

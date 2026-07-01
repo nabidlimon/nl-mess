@@ -59,6 +59,41 @@ export default function TomorrowMeal() {
         setGuestMorning(data.guestMorning || 0);
         setGuestLunch(data.guestLunch || 0);
         setGuestDinner(data.guestDinner || 0);
+      } else {
+        // Fallback: Find the latest meal record for this member before tomorrow to inherit
+        const qPrev = query(
+          collection(db, 'meals'),
+          where('messId', '==', currentMess.id),
+          where('memberId', '==', userProfile.id)
+        );
+        const snapPrev = await getDocs(qPrev);
+        if (!snapPrev.empty) {
+          const sorted = snapPrev.docs
+            .map(d => ({ id: d.id, ...d.data() } as any))
+            .filter(d => d.date < dateStr)
+            .sort((a, b) => b.date.localeCompare(a.date));
+          
+          if (sorted.length > 0) {
+            const data = sorted[0];
+            if (data.morning !== undefined) {
+              setMorning(!!data.morning);
+              setLunch(!!data.lunch);
+              setDinner(!!data.dinner);
+            } else {
+              const val = data.displayValue || String(data.mealCount || 0);
+              setMorning(val.includes('0.5') || val.includes('1.5') || val.includes('2.5'));
+              setLunch(val.includes('D') || Number(val) > 0.5);
+              setDinner(val.includes('N') || Number(val) > 1.5);
+            }
+            // Reset guests to 0 for the default inherit state
+            setPendingGuestMorning(0);
+            setPendingGuestLunch(0);
+            setPendingGuestDinner(0);
+            setGuestMorning(0);
+            setGuestLunch(0);
+            setGuestDinner(0);
+          }
+        }
       }
     };
     fetchTomorrowMeal();

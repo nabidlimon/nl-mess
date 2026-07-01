@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { collection, query, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Member, Meal, Deposit, BazarCost } from '../types';
-import { format } from 'date-fns';
+import { format, parse, getDaysInMonth } from 'date-fns';
 import { Download, FileText, Image as ImageIcon } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { toPng } from 'html-to-image';
@@ -50,8 +50,29 @@ export default function Settlement() {
 
   const currentMonthPrefix = selectedMonth;
   
-  const currentMonthMeals = meals.filter(m => m.date.startsWith(currentMonthPrefix));
-  const totalMeals = currentMonthMeals.reduce((sum, m) => sum + m.mealCount, 0);
+  const getMemberMealsForMonth = (memberId: string, monthStr: string) => {
+    const currentMonthDate = parse(monthStr, 'yyyy-MM', new Date());
+    const daysInMonth = getDaysInMonth(currentMonthDate);
+    let total = 0;
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${monthStr}-${String(day).padStart(2, '0')}`;
+      const exact = meals.find(m => m.memberId === memberId && m.date === dateStr);
+      if (exact) {
+        total += exact.mealCount || 0;
+      } else {
+        const latest = meals
+          .filter(m => m.memberId === memberId && m.date < dateStr)
+          .sort((a, b) => b.date.localeCompare(a.date))[0];
+        if (latest) {
+          total += latest.mealCount || 0;
+        }
+      }
+    }
+    return total;
+  };
+
+  const totalMeals = members.reduce((sum, member) => sum + getMemberMealsForMonth(member.id, currentMonthPrefix), 0);
   
   const currentMonthDeposits = deposits.filter(d => d.date.startsWith(currentMonthPrefix));
   
@@ -61,7 +82,7 @@ export default function Settlement() {
   const mealRate = totalMeals > 0 ? totalBazarCost / totalMeals : 0;
 
   const settlementData = members.map(member => {
-    const memberMeals = currentMonthMeals.filter(m => m.memberId === member.id).reduce((sum, m) => sum + m.mealCount, 0);
+    const memberMeals = getMemberMealsForMonth(member.id, currentMonthPrefix);
     const memberDeposits = currentMonthDeposits.filter(d => d.memberId === member.id).reduce((sum, d) => sum + d.amount, 0);
     const mealCost = memberMeals * mealRate;
     const balance = memberDeposits - mealCost;

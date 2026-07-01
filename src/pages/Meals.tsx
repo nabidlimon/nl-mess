@@ -356,7 +356,24 @@ export default function Meals() {
     
     if (editedMeals[key] !== undefined) return editedMeals[key];
     if (mealMap[key]) return mealMap[key].displayValue || (mealMap[key].mealCount > 0 ? String(mealMap[key].mealCount) : '');
+    
+    // Fallback: search backwards for the latest explicit meal record of this member before dateStr
+    const latest = meals
+      .filter(m => m.memberId === memberId && m.date < dateStr)
+      .sort((a, b) => b.date.localeCompare(a.date))[0];
+    
+    if (latest) {
+      return latest.displayValue || (latest.mealCount > 0 ? String(latest.mealCount) : '');
+    }
     return '';
+  };
+
+  const isMealInherited = (memberId: string, day: number) => {
+    const dateStr = `${monthStr}-${String(day).padStart(2, '0')}`;
+    const key = `${memberId}_${dateStr}`;
+    if (editedMeals[key] !== undefined) return false;
+    if (mealMap[key]) return false;
+    return true;
   };
 
   const parseComputedTotal = (valueStr: string | number) => {
@@ -390,7 +407,17 @@ export default function Meals() {
     members.forEach(m => {
       const dateStr = `${monthStr}-${String(day).padStart(2, '0')}`;
       const key = `${m.id}_${dateStr}`;
-      const mDoc = mealMap[key];
+      
+      // Look up effective meal document (explicit or inherited)
+      let mDoc = mealMap[key];
+      if (!mDoc) {
+        const latest = meals
+          .filter(x => x.memberId === m.id && x.date < dateStr)
+          .sort((a, b) => b.date.localeCompare(a.date))[0];
+        if (latest) {
+          mDoc = latest;
+        }
+      }
 
       if (mDoc) {
         // Count own meals using booleans if defined
@@ -569,14 +596,21 @@ export default function Meals() {
                     const approvedGuestTotal = mDoc ? ((mDoc.guestMorning || 0) + (mDoc.guestLunch || 0) + (mDoc.guestDinner || 0)) : 0;
                     const pendingGuestTotal = mDoc ? ((mDoc.pendingGuestMorning || 0) + (mDoc.pendingGuestLunch || 0) + (mDoc.pendingGuestDinner || 0)) : 0;
 
+                    const isInherited = isMealInherited(member.id, day) && val !== '';
+
                     return (
-                      <td key={i} className={`p-0 border-r border-slate-100 relative ${isEdited ? 'bg-yellow-50/50' : ''}`}>
+                      <td key={i} className={`p-0 border-r border-slate-100 relative ${isEdited ? 'bg-yellow-50/50' : ''} ${isInherited ? 'bg-slate-55/10 dark:bg-slate-950/10' : ''}`}>
                         <input
                           type="text"
                           value={val}
                           readOnly={isReadOnly}
+                          placeholder="0"
                           onChange={(e) => handleMealChange(member.id, day, e.target.value)}
-                          className={`w-full h-full min-h-[44px] text-center text-sm font-mono border-none bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-600 outline-none ${isReadOnly ? 'cursor-default text-slate-500' : 'cursor-text hover:bg-slate-50 font-medium text-slate-900'}`}
+                          className={`w-full h-full min-h-[44px] text-center text-sm font-mono border-none bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-600 outline-none ${
+                            isReadOnly ? 'cursor-default text-slate-500' : 'cursor-text hover:bg-slate-50/40 font-medium'
+                          } ${
+                            isInherited ? 'text-slate-450 dark:text-slate-550 italic font-normal' : 'text-slate-900 dark:text-slate-100 font-bold'
+                          }`}
                         />
                         
                         {/* Guest meal badges */}

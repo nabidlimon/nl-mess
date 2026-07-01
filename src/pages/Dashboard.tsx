@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { collection, query, onSnapshot, where, doc, updateDoc, arrayUnion, arrayRemove, setDoc, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Member, Meal, Deposit, BazarCost } from '../types';
-import { format, startOfMonth, getDaysInMonth, differenceInHours, differenceInMinutes, endOfDay, addDays } from 'date-fns';
+import { format, startOfMonth, getDaysInMonth, differenceInHours, differenceInMinutes, endOfDay, addDays, parse } from 'date-fns';
 import { Users, Utensils, Wallet, ShoppingCart, TrendingUp, AlertCircle, CheckCircle, Megaphone, ChevronRight, X, Bell, Info, Sun, Sunrise, Moon, Ban, Timer, CheckCircle2, Loader2, ThumbsUp, Heart, Smile, ClipboardCheck, Sparkles, UtensilsCrossed } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -190,9 +190,30 @@ export default function Dashboard() {
   const currentMonthPrefix = selectedMonth; // format: 'yyyy-MM'
   
   const activeMembers = members.filter(m => m.status === 'Active');
+
+  const getMemberMealsForMonth = (memberId: string, monthStr: string) => {
+    const currentMonthDate = parse(monthStr, 'yyyy-MM', new Date());
+    const daysInMonth = getDaysInMonth(currentMonthDate);
+    let total = 0;
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${monthStr}-${String(day).padStart(2, '0')}`;
+      const exact = meals.find(m => m.memberId === memberId && m.date === dateStr);
+      if (exact) {
+        total += exact.mealCount || 0;
+      } else {
+        const latest = meals
+          .filter(m => m.memberId === memberId && m.date < dateStr)
+          .sort((a, b) => b.date.localeCompare(a.date))[0];
+        if (latest) {
+          total += latest.mealCount || 0;
+        }
+      }
+    }
+    return total;
+  };
   
-  const currentMonthMeals = meals.filter(m => m.date.startsWith(currentMonthPrefix));
-  const totalMeals = currentMonthMeals.reduce((sum, m) => sum + m.mealCount, 0);
+  const totalMeals = activeMembers.reduce((sum, m) => sum + getMemberMealsForMonth(m.id, currentMonthPrefix), 0);
   
   const currentMonthDeposits = deposits.filter(d => d.date.startsWith(currentMonthPrefix));
   const totalDeposits = currentMonthDeposits.reduce((sum, d) => sum + d.amount, 0);
@@ -204,7 +225,7 @@ export default function Dashboard() {
 
   // My Passbook stats
   const myDeposits = currentMonthDeposits.filter(d => d.memberId === userProfile?.id).reduce((sum, d) => sum + d.amount, 0);
-  const myMeals = currentMonthMeals.filter(m => m.memberId === userProfile?.id).reduce((sum, m) => sum + m.mealCount, 0);
+  const myMeals = userProfile ? getMemberMealsForMonth(userProfile.id, currentMonthPrefix) : 0;
   const myCost = myMeals * mealRate;
   const myBalance = myDeposits - myCost;
 
@@ -215,7 +236,29 @@ export default function Dashboard() {
 
   // Today's Mess Overview stats (Manager view)
   const todayDateStr = format(new Date(), 'yyyy-MM-dd');
-  const todayMeals = meals.filter(m => m.date === todayDateStr);
+  
+  // Construct today's meals list (explicit or inherited)
+  const todayMeals = activeMembers.map(member => {
+    const dateStr = todayDateStr;
+    const exact = meals.find(m => m.memberId === member.id && m.date === dateStr);
+    if (exact) return exact;
+    
+    const latest = meals
+      .filter(m => m.memberId === member.id && m.date < dateStr)
+      .sort((a, b) => b.date.localeCompare(a.date))[0];
+    return latest ? { ...latest, date: dateStr } : {
+      memberId: member.id,
+      date: dateStr,
+      mealCount: 0,
+      morning: false,
+      lunch: false,
+      dinner: false,
+      guestMorning: 0,
+      guestLunch: 0,
+      guestDinner: 0
+    } as Meal;
+  });
+
   const todayBazarCost = costs.filter(c => c.date === todayDateStr).reduce((sum, c) => sum + c.totalPrice, 0);
 
   // Fallback segment builder for legacy or manager-edited meal logs
@@ -283,7 +326,17 @@ export default function Dashboard() {
     const day = String(i + 1).padStart(2, '0');
     const dateStr = `${currentMonthPrefix}-${day}`;
     
-    const dayMeals = currentMonthMeals.filter(m => m.date === dateStr).reduce((sum, m) => sum + m.mealCount, 0);
+    const dayMeals = activeMembers.reduce((sum, member) => {
+      const exact = meals.find(m => m.memberId === member.id && m.date === dateStr);
+      if (exact) {
+        return sum + (exact.mealCount || 0);
+      } else {
+        const latest = meals
+          .filter(m => m.memberId === member.id && m.date < dateStr)
+          .sort((a, b) => b.date.localeCompare(a.date))[0];
+        return sum + (latest ? (latest.mealCount || 0) : 0);
+      }
+    }, 0);
     const dayExpenses = currentMonthCosts.filter(c => c.date === dateStr).reduce((sum, c) => sum + c.totalPrice, 0);
     
     tempCumulativeMeals += dayMeals;

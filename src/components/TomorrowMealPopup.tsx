@@ -78,8 +78,29 @@ export function TomorrowMealPopup() {
         );
         const snap = await getDocs(q);
         
-        // If no tomorrow meal document is found, pop up after 1 second
+        // If no tomorrow meal document is found, pre-fill from latest record and pop up after 1 second
         if (snap.empty) {
+          const qPrev = query(
+            collection(db, 'meals'),
+            where('messId', '==', currentMess.id),
+            where('memberId', '==', userProfile.id)
+          );
+          const snapPrev = await getDocs(qPrev);
+          if (!snapPrev.empty) {
+            const sorted = snapPrev.docs
+              .map(d => ({ id: d.id, ...d.data() } as any))
+              .filter(d => d.date < dateStr)
+              .sort((a, b) => b.date.localeCompare(a.date));
+            if (sorted.length > 0) {
+              const prevData = sorted[0];
+              const isOff = prevData.mealCount === 0;
+              setMorning(isOff ? false : !!prevData.morning);
+              setLunch(isOff ? false : !!prevData.lunch);
+              setDinner(isOff ? false : !!prevData.dinner);
+              setMealOff(isOff);
+            }
+          }
+
           timer = setTimeout(() => {
             setShow(true);
           }, 1000);
