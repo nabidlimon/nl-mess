@@ -11,7 +11,14 @@ export default function Approvals() {
   const { currentMess, userProfile, isSupreme } = useAuth();
   const { t, language } = useLanguage();
 
-  const [activeTab, setActiveTab] = useState<'admissions' | 'guestMeals'>('admissions');
+  const isMessManager = (currentMess?.managerIds || []).includes(userProfile?.id || '');
+  const isOverallManager = isMessManager || isSupreme || userProfile?.role === 'Manager';
+  const isMealManager = userProfile?.role === 'MealManager';
+  const isAdmin = isOverallManager || isMealManager;
+
+  const [activeTab, setActiveTab] = useState<'admissions' | 'guestMeals'>(
+    isOverallManager ? 'admissions' : 'guestMeals'
+  );
   const [pendingMembers, setPendingMembers] = useState<Member[]>([]);
   const [pendingMeals, setPendingMeals] = useState<(Meal & { memberName?: string })[]>([]);
   const [membersMap, setMembersMap] = useState<Record<string, Member>>({});
@@ -21,9 +28,6 @@ export default function Approvals() {
   // States for room allocation modal
   const [allocatingMember, setAllocatingMember] = useState<Member | null>(null);
   const [roomNumber, setRoomNumber] = useState('');
-
-  const isMessManager = (currentMess?.managerIds || []).includes(userProfile?.id || '');
-  const isAdmin = isMessManager || isSupreme || userProfile?.role === 'Manager' || userProfile?.role === 'MealManager';
 
   // 1. Fetch all members/users in the mess
   useEffect(() => {
@@ -324,56 +328,62 @@ export default function Approvals() {
 
         {/* Counter Summary Pills */}
         <div className="flex flex-wrap gap-2.5">
-          <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl px-4 py-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-            <span className="text-xs font-bold text-amber-800 dark:text-amber-400">
-              {pendingMembers.length} {language === 'bn' ? 'আবেদন' : 'Admissions'}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/50 rounded-2xl px-4 py-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-            <span className="text-xs font-bold text-indigo-800 dark:text-indigo-400">
-              {pendingMeals.length} {language === 'bn' ? 'গেস্ট মিল' : 'Guest Meals'}
-            </span>
-          </div>
+          {isOverallManager && (
+            <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-2xl px-4 py-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+              <span className="text-xs font-bold text-amber-800 dark:text-amber-400">
+                {pendingMembers.length} {language === 'bn' ? 'আবেদন' : 'Admissions'}
+              </span>
+            </div>
+          )}
+          {(isOverallManager || isMealManager) && (
+            <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/50 rounded-2xl px-4 py-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+              <span className="text-xs font-bold text-indigo-800 dark:text-indigo-400">
+                {pendingMeals.length} {language === 'bn' ? 'গেস্ট মিল' : 'Guest Meals'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-1.5 rounded-2xl max-w-md">
-        <button
-          onClick={() => setActiveTab('admissions')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black rounded-xl transition-all cursor-pointer ${
-            activeTab === 'admissions'
-              ? 'bg-white dark:bg-slate-900 text-slate-850 dark:text-white shadow-md'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-        >
-          <UserCheck className="w-4 h-4" />
-          <span>{language === 'bn' ? 'ভর্তি অনুরোধ' : 'Pending Admissions'}</span>
-          {pendingMembers.length > 0 && (
-            <span className="px-2 py-0.5 text-[10px] font-black bg-amber-500 text-white rounded-full leading-none">
-              {pendingMembers.length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('guestMeals')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black rounded-xl transition-all cursor-pointer ${
-            activeTab === 'guestMeals'
-              ? 'bg-white dark:bg-slate-900 text-slate-850 dark:text-white shadow-md'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-        >
-          <UtensilsCrossed className="w-4 h-4" />
-          <span>{language === 'bn' ? 'গেস্ট মিল' : 'Guest Meal Requests'}</span>
-          {pendingMeals.length > 0 && (
-            <span className="px-2 py-0.5 text-[10px] font-black bg-indigo-500 text-white rounded-full leading-none">
-              {pendingMeals.length}
-            </span>
-          )}
-        </button>
-      </div>
+      {isOverallManager && (
+        <div className="flex bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-1.5 rounded-2xl max-w-md">
+          <button
+            onClick={() => setActiveTab('admissions')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black rounded-xl transition-all cursor-pointer ${
+              activeTab === 'admissions'
+                ? 'bg-white dark:bg-slate-900 text-slate-850 dark:text-white shadow-md'
+                : 'text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            <UserCheck className="w-4 h-4" />
+            <span>{language === 'bn' ? 'ভর্তি অনুরোধ' : 'Pending Admissions'}</span>
+            {pendingMembers.length > 0 && (
+              <span className="px-2 py-0.5 text-[10px] font-black bg-amber-500 text-white rounded-full leading-none">
+                {pendingMembers.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('guestMeals')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black rounded-xl transition-all cursor-pointer ${
+              activeTab === 'guestMeals'
+                ? 'bg-white dark:bg-slate-900 text-slate-850 dark:text-white shadow-md'
+                : 'text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            <UtensilsCrossed className="w-4 h-4" />
+            <span>{language === 'bn' ? 'গেস্ট মিল' : 'Guest Meal Requests'}</span>
+            {pendingMeals.length > 0 && (
+              <span className="px-2 py-0.5 text-[10px] font-black bg-indigo-500 text-white rounded-full leading-none">
+                {pendingMeals.length}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* ── Active Tab Display Panel ── */}
       {loading ? (
@@ -381,7 +391,7 @@ export default function Approvals() {
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-2" />
           <p className="text-sm text-slate-500 dark:text-slate-400 font-bold">{t('common.loading')}</p>
         </div>
-      ) : activeTab === 'admissions' ? (
+      ) : activeTab === 'admissions' && isOverallManager ? (
         /* ──── ADMISSIONS TAB ──── */
         pendingMembers.length === 0 ? (
           <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 transition-colors duration-200">

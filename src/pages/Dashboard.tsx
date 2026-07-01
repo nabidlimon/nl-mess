@@ -209,7 +209,9 @@ export default function Dashboard() {
   const myBalance = myDeposits - myCost;
 
   const isMessManager = (currentMess?.managerIds || []).includes(userProfile?.id || '');
-  const isAdmin = isMessManager || isSupreme || userProfile?.role === 'Manager' || userProfile?.role === 'MealManager';
+  const isOverallManager = isMessManager || isSupreme || userProfile?.role === 'Manager';
+  const isMealManager = userProfile?.role === 'MealManager';
+  const isAdmin = isOverallManager || isMealManager;
 
   const pendingAdmissions = members.filter(m => m.status === 'Pending');
   const pendingGuestMeals = meals.filter(m => 
@@ -221,14 +223,17 @@ export default function Dashboard() {
   useEffect(() => {
     if (loading || !isAdmin) return;
     
-    const totalPending = pendingAdmissions.length + pendingGuestMeals.length;
+    const admissionsCount = isOverallManager ? pendingAdmissions.length : 0;
+    const guestMealsCount = (isOverallManager || isMealManager) ? pendingGuestMeals.length : 0;
+    const totalPending = admissionsCount + guestMealsCount;
+    
     if (totalPending > 0) {
       const hasShown = sessionStorage.getItem('approvals_popup_shown');
       if (!hasShown) {
         setShowApprovalsPopup(true);
       }
     }
-  }, [loading, pendingAdmissions.length, pendingGuestMeals.length, isAdmin]);
+  }, [loading, pendingAdmissions.length, pendingGuestMeals.length, isOverallManager, isMealManager, isAdmin]);
 
   // Chart data
   const [year, month] = selectedMonth.split('-');
@@ -639,7 +644,7 @@ export default function Dashboard() {
 
               {/* Counts List */}
               <div className="my-5 space-y-2.5">
-                {pendingAdmissions.length > 0 && (
+                {isOverallManager && pendingAdmissions.length > 0 && (
                   <div className="flex items-center justify-between p-3.5 bg-amber-500/5 border border-amber-500/10 rounded-2xl">
                     <div className="flex items-center gap-2.5">
                       <Users className="w-4 h-4 text-amber-500" />
@@ -652,7 +657,7 @@ export default function Dashboard() {
                     </span>
                   </div>
                 )}
-                {pendingGuestMeals.length > 0 && (
+                {(isOverallManager || isMealManager) && pendingGuestMeals.length > 0 && (
                   <div className="flex items-center justify-between p-3.5 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl">
                     <div className="flex items-center gap-2.5">
                       <UtensilsCrossed className="w-4 h-4 text-indigo-500" />
