@@ -15,7 +15,7 @@ import {
 
 export default function AuthorityPanel() {
   const navigate = useNavigate();
-  const { userProfile, isSupreme, refreshProfile, setHasEntered } = useAuth();
+  const { user, userProfile, isSupreme, refreshProfile, setHasEntered } = useAuth();
   const { language } = useLanguage();
 
   const [messes, setMesses] = useState<Mess[]>([]);
@@ -176,12 +176,28 @@ export default function AuthorityPanel() {
 
   // Entering a mess securely
   const handleEnterMess = async (messId: string) => {
-    if (!userProfile) return;
+    if (!user) return;
     try {
       setActionLoading(true);
-      const existingMessIds = userProfile.messIds || [];
-      const memberships = (userProfile as any).memberships || {};
       
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      
+      let existingMessIds: string[] = [];
+      let memberships: Record<string, any> = {};
+      let name = user.displayName || 'Supreme Admin';
+      let email = user.email || 'nabidahamed2003@gmail.com';
+      let phone = '';
+
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        existingMessIds = data.messIds || [];
+        memberships = data.memberships || {};
+        name = data.name || name;
+        email = data.email || email;
+        phone = data.phone || phone;
+      }
+
       // Inject Active Manager credentials for target spoofed mess
       memberships[messId] = {
         role: 'Manager',
@@ -189,13 +205,20 @@ export default function AuthorityPanel() {
         room: ''
       };
 
-      await updateDoc(doc(db, 'users', userProfile.id), {
+      const updatedProfile = {
+        id: user.uid,
+        name: name,
+        email: email,
+        phone: phone,
         messId: messId,
         messIds: Array.from(new Set([...existingMessIds, messId])),
         role: 'Manager',
         status: 'Active',
-        memberships: memberships
-      });
+        memberships: memberships,
+        isRegistered: true
+      };
+
+      await setDoc(userRef, updatedProfile);
       
       localStorage.setItem('hasEntered', 'true');
       setHasEntered(true);
