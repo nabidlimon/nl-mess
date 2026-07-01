@@ -199,20 +199,25 @@ export default function TomorrowMeal() {
           <button
             type="button"
             onClick={onDecrement}
-            disabled={pendingVal <= 0}
+            disabled={pendingVal <= 0 && approvedVal <= 0}
             className={`w-7.5 h-7.5 rounded-lg flex items-center justify-center border transition-all ${
-              pendingVal > 0 
+              pendingVal > 0 || approvedVal > 0 
                 ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm active:scale-90' 
                 : 'bg-slate-100/50 border-transparent text-slate-300 cursor-not-allowed'
             }`}
           >
             <Minus className="w-4.5 h-4.5" />
           </button>
-          <span className="w-5 text-center font-mono font-bold text-slate-800 text-base">{pendingVal}</span>
+          <span className="w-5 text-center font-mono font-bold text-slate-800 text-base">{approvedVal + pendingVal}</span>
           <button
             type="button"
             onClick={onIncrement}
-            className="w-7.5 h-7.5 rounded-lg flex items-center justify-center border bg-white border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm active:scale-90"
+            disabled={approvedVal + pendingVal >= 2}
+            className={`w-7.5 h-7.5 rounded-lg flex items-center justify-center border transition-all ${
+              approvedVal + pendingVal < 2
+                ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer shadow-sm active:scale-90' 
+                : 'bg-slate-100/50 border-transparent text-slate-300 cursor-not-allowed'
+            }`}
           >
             <Plus className="w-4.5 h-4.5" />
           </button>
@@ -276,8 +281,8 @@ export default function TomorrowMeal() {
           </div>
           <p className="text-xs text-slate-400 mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100/50">
             ℹ️ {language === 'bn' 
-              ? 'অতিথি খাবার যুক্ত করার পর মিল ম্যানেজারের অনুমোদন প্রয়োজন হবে।' 
-              : 'Guest meals require manual approval by the meal manager to take effect.'}
+              ? 'গেস্ট মিল বুকিং করার পর মিল ম্যানেজারের অনুমোদন প্রয়োজন হবে। প্রতিটি বেলাতে সর্বোচ্চ ২টি গেস্ট মিল বুকিং করা যাবে।' 
+              : 'Guest meals require manual approval. At most 2 guest meals can be requested per time period.'}
           </p>
           
           <div className="space-y-2">
@@ -285,8 +290,8 @@ export default function TomorrowMeal() {
               label={language === 'bn' ? 'সকালের অতিথি' : 'Morning Guest'}
               pendingVal={pendingGuestMorning}
               approvedVal={guestMorning}
-              onIncrement={() => setPendingGuestMorning(v => v + 1)}
-              onDecrement={() => setPendingGuestMorning(v => Math.max(0, v - 1))}
+              onIncrement={() => { if (guestMorning + pendingGuestMorning < 2) setPendingGuestMorning(v => v + 1); }}
+              onDecrement={() => { if (pendingGuestMorning > 0) setPendingGuestMorning(v => v - 1); else if (guestMorning > 0) setGuestMorning(v => v - 1); }}
               icon={Sunrise}
               colorClass="text-amber-500"
             />
@@ -294,8 +299,8 @@ export default function TomorrowMeal() {
               label={language === 'bn' ? 'দুপুরের অতিথি' : 'Lunch Guest'}
               pendingVal={pendingGuestLunch}
               approvedVal={guestLunch}
-              onIncrement={() => setPendingGuestLunch(v => v + 1)}
-              onDecrement={() => setPendingGuestLunch(v => Math.max(0, v - 1))}
+              onIncrement={() => { if (guestLunch + pendingGuestLunch < 2) setPendingGuestLunch(v => v + 1); }}
+              onDecrement={() => { if (pendingGuestLunch > 0) setPendingGuestLunch(v => v - 1); else if (guestLunch > 0) setGuestLunch(v => v - 1); }}
               icon={Sun}
               colorClass="text-orange-500"
             />
@@ -303,8 +308,8 @@ export default function TomorrowMeal() {
               label={language === 'bn' ? 'রাতের অতিথি' : 'Dinner Guest'}
               pendingVal={pendingGuestDinner}
               approvedVal={guestDinner}
-              onIncrement={() => setPendingGuestDinner(v => v + 1)}
-              onDecrement={() => setPendingGuestDinner(v => Math.max(0, v - 1))}
+              onIncrement={() => { if (guestDinner + pendingGuestDinner < 2) setPendingGuestDinner(v => v + 1); }}
+              onDecrement={() => { if (pendingGuestDinner > 0) setPendingGuestDinner(v => v - 1); else if (guestDinner > 0) setGuestDinner(v => v - 1); }}
               icon={Moon}
               colorClass="text-indigo-500"
             />
