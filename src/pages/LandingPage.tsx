@@ -171,18 +171,47 @@ export default function LandingPage() {
   const [userMeals, setUserMeals] = useState(32);
   const [userDeposit, setUserDeposit] = useState(1000);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
   useEffect(() => {
     document.title = 'NL Mess Pro — Smart Hostel & Mess Meal Management App | Nanolez Tech';
-    const setMeta = (n: string, c: string) => {
-      let el = document.querySelector(`meta[name="${n}"]`) as HTMLMetaElement | null;
-      if (!el) { el = document.createElement('meta'); el.name = n; document.head.appendChild(el); }
-      el.content = c;
+    
+    // Set standard meta tags
+    const setMeta = (name: string, content: string) => {
+      let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement('meta'); el.name = name; document.head.appendChild(el); }
+      el.content = content;
     };
+    
+    // Set OpenGraph meta tags
+    const setMetaProperty = (property: string, content: string) => {
+      let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement('meta'); el.setAttribute('property', property); document.head.appendChild(el); }
+      el.content = content;
+    };
+
+    const origin = window.location.origin;
+    const siteUrl = window.location.href;
+    const ogImg = origin + '/favicon.svg';
+
     setMeta('description', 'NL Mess Pro by Nanolez Tech — a premium mess management app for tracking hostel meals, bazaar costs, deposits, and automated monthly settlements. Built for university students in Bangladesh.');
     setMeta('keywords', 'mess management app Bangladesh, hostel meal tracker, meal rate calculator, bazar expense tracker, border deposit, mess settlement app, Nanolez Tech, NL Mess Pro');
     setMeta('author', 'Nabid Ahamed, Nanolez Tech');
     setMeta('robots', 'index, follow');
+
+    // OpenGraph SEO
+    setMetaProperty('og:type', 'website');
+    setMetaProperty('og:url', siteUrl);
+    setMetaProperty('og:title', 'NL Mess Pro — Smart Hostel & Mess Meal Management App | Nanolez Tech');
+    setMetaProperty('og:description', 'Digitize your mess today. Track daily meals, bazar expenses, and borders deposits. Generate automated monthly settlements with zero errors. Built for university students in Bangladesh.');
+    setMetaProperty('og:image', ogImg);
+    setMetaProperty('og:image:type', 'image/svg+xml');
+    setMetaProperty('og:site_name', 'NL Mess Pro');
+
+    // Twitter Cards
+    setMetaProperty('twitter:card', 'summary_large_image');
+    setMetaProperty('twitter:url', siteUrl);
+    setMetaProperty('twitter:title', 'NL Mess Pro — Smart Hostel & Mess Meal Management App | Nanolez Tech');
+    setMetaProperty('twitter:description', 'Digitize your mess today. Track daily meals, bazar expenses, and borders deposits. Generate automated monthly settlements with zero errors. Built for university students in Bangladesh.');
+    setMetaProperty('twitter:image', ogImg);
 
     const schemaId = 'nl-mess-schema';
     let s = document.getElementById(schemaId);
