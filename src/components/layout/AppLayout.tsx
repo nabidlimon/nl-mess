@@ -26,6 +26,7 @@ import {
   ChevronRight as Arrow,
   Sun,
   Moon,
+  CheckCircle2,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { LogoIcon } from '../Logo';
@@ -66,6 +67,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     { name: language === 'bn' ? 'মেসসমূহ' : 'My Messes',             path: '/onboarding',    icon: RefreshCcw,       show: (userProfile?.messIds?.length || 0) > 1 || managedMesses.length > 1 },
     { name: t('nav.members'),                                          path: '/members',       icon: Users,            show: isAdmin },
     { name: t('nav.manager_panel'),                                    path: '/manager-panel', icon: FileSpreadsheet,  show: isAdmin },
+    { name: language === 'bn' ? 'অনুমোদন প্যানেল' : 'Approvals Panel', path: '/approvals',      icon: CheckCircle2,     show: isAdmin },
     { name: t('nav.tomorrow_meal'),                                    path: '/tomorrow-meal', icon: Utensils,         show: true },
     { name: t('nav.meals'),                                            path: '/meals',         icon: UtensilsCrossed,  show: true },
     { name: t('nav.deposits'),                                         path: '/deposits',      icon: Wallet,           show: true },

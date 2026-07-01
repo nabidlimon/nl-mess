@@ -24,6 +24,7 @@ import AuthorityPanel from './pages/AuthorityPanel';
 import TomorrowMeal from './pages/TomorrowMeal';
 import Profile from './pages/Profile';
 import ManagerPanel from './pages/ManagerPanel';
+import Approvals from './pages/Approvals';
 import { useLanguage } from './contexts/LanguageContext';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -105,6 +106,7 @@ function RoutesConfig() {
       <Route path="/bazar" element={<PrivateRoute><Bazar /></PrivateRoute>} />
       <Route path="/settlement" element={<PrivateRoute><Settlement /></PrivateRoute>} />
       <Route path="/manager-panel" element={<PrivateRoute><ManagerPanel /></PrivateRoute>} />
+      <Route path="/approvals" element={<PrivateRoute><Approvals /></PrivateRoute>} />
       <Route path="/about" element={<PrivateRoute><About /></PrivateRoute>} />
       <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
       <Route path="/authority" element={<PrivateRoute><AuthorityPanel /></PrivateRoute>} />

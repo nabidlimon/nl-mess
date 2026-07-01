@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { collection, query, onSnapshot, where, doc, updateDoc, arrayUnion, arrayRemove, setDoc, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Member, Meal, Deposit, BazarCost } from '../types';
 import { format, startOfMonth, getDaysInMonth, differenceInHours, differenceInMinutes, endOfDay, addDays } from 'date-fns';
-import { Users, Utensils, Wallet, ShoppingCart, TrendingUp, AlertCircle, CheckCircle, Megaphone, ChevronRight, X, Bell, Info, Sun, Sunrise, Moon, Ban, Timer, CheckCircle2, Loader2, ThumbsUp, Heart, Smile } from 'lucide-react';
+import { Users, Utensils, Wallet, ShoppingCart, TrendingUp, AlertCircle, CheckCircle, Megaphone, ChevronRight, X, Bell, Info, Sun, Sunrise, Moon, Ban, Timer, CheckCircle2, Loader2, ThumbsUp, Heart, Smile, ClipboardCheck, Sparkles, UtensilsCrossed } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useMonth } from '../contexts/MonthContext';
 import { MealPollsWidget } from '../components/MealPollsWidget';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function Dashboard() {
-  const { currentMess, userProfile } = useAuth();
+  const { currentMess, userProfile, isSupreme } = useAuth();
   const { t, language } = useLanguage();
   const { selectedMonth } = useMonth();
+  const navigate = useNavigate();
   const [members, setMembers] = useState<Member[]>([]);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
@@ -22,6 +25,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [notices, setNotices] = useState<any[]>([]);
   const [selectedNotice, setSelectedNotice] = useState<any | null>(null);
+  const [showApprovalsPopup, setShowApprovalsPopup] = useState(false);
 
   // Time-aware greeting
   const [greeting, setGreeting] = useState('');
@@ -203,6 +207,28 @@ export default function Dashboard() {
   const myMeals = currentMonthMeals.filter(m => m.memberId === userProfile?.id).reduce((sum, m) => sum + m.mealCount, 0);
   const myCost = myMeals * mealRate;
   const myBalance = myDeposits - myCost;
+
+  const isMessManager = (currentMess?.managerIds || []).includes(userProfile?.id || '');
+  const isAdmin = isMessManager || isSupreme || userProfile?.role === 'Manager' || userProfile?.role === 'MealManager';
+
+  const pendingAdmissions = members.filter(m => m.status === 'Pending');
+  const pendingGuestMeals = meals.filter(m => 
+    (m.pendingGuestMorning && m.pendingGuestMorning > 0) ||
+    (m.pendingGuestLunch && m.pendingGuestLunch > 0) ||
+    (m.pendingGuestDinner && m.pendingGuestDinner > 0)
+  );
+
+  useEffect(() => {
+    if (loading || !isAdmin) return;
+    
+    const totalPending = pendingAdmissions.length + pendingGuestMeals.length;
+    if (totalPending > 0) {
+      const hasShown = sessionStorage.getItem('approvals_popup_shown');
+      if (!hasShown) {
+        setShowApprovalsPopup(true);
+      }
+    }
+  }, [loading, pendingAdmissions.length, pendingGuestMeals.length, isAdmin]);
 
   // Chart data
   const [year, month] = selectedMonth.split('-');
@@ -568,6 +594,106 @@ export default function Dashboard() {
             </div>
          </div>
       )}
+
+      {/* Approvals Warning Popup for Managers */}
+      <AnimatePresence>
+        {showApprovalsPopup && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"
+              onClick={() => {
+                setShowApprovalsPopup(false);
+                sessionStorage.setItem('approvals_popup_shown', 'true');
+              }}
+            />
+            
+            {/* Dialog Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 dark:border-slate-800 p-6 relative z-10 overflow-hidden"
+            >
+              {/* Background Glow */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-amber-500/10 text-amber-500 rounded-2xl shrink-0">
+                  <AlertCircle className="w-6 h-6 animate-pulse" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-black text-slate-950 dark:text-white leading-tight">
+                    {language === 'bn' ? 'অনুমোদন পেন্ডিং রয়েছে!' : 'Approvals Pending Attention!'}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                    {language === 'bn'
+                      ? 'আপনার ড্যাশবোর্ডে কিছু অমীমাংসিত অনুরোধ রয়েছে যা পর্যালোচনা করা প্রয়োজন:'
+                      : 'You have pending requests in your mess that require your immediate action:'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Counts List */}
+              <div className="my-5 space-y-2.5">
+                {pendingAdmissions.length > 0 && (
+                  <div className="flex items-center justify-between p-3.5 bg-amber-500/5 border border-amber-500/10 rounded-2xl">
+                    <div className="flex items-center gap-2.5">
+                      <Users className="w-4 h-4 text-amber-500" />
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        {language === 'bn' ? 'নতুন ভর্তি আবেদন' : 'Pending Admission Requests'}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-amber-600 bg-amber-100 dark:bg-amber-950/40 px-2.5 py-1 rounded-full font-mono">
+                      {pendingAdmissions.length}
+                    </span>
+                  </div>
+                )}
+                {pendingGuestMeals.length > 0 && (
+                  <div className="flex items-center justify-between p-3.5 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl">
+                    <div className="flex items-center gap-2.5">
+                      <UtensilsCrossed className="w-4 h-4 text-indigo-500" />
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        {language === 'bn' ? 'গেস্ট মিল টোকেন' : 'Pending Guest Meal Tokens'}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-indigo-600 bg-indigo-100 dark:bg-indigo-950/40 px-2.5 py-1 rounded-full font-mono">
+                      {pendingGuestMeals.length}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  onClick={() => {
+                    setShowApprovalsPopup(false);
+                    sessionStorage.setItem('approvals_popup_shown', 'true');
+                  }}
+                  className="flex-1 py-3 border border-slate-200 dark:border-slate-750 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+                >
+                  {language === 'bn' ? 'পরে দেখব' : 'Later'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowApprovalsPopup(false);
+                    sessionStorage.setItem('approvals_popup_shown', 'true');
+                    navigate('/approvals');
+                  }}
+                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/10 active:scale-98 text-center cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <ClipboardCheck className="w-4 h-4" />
+                  <span>{language === 'bn' ? 'পর্যালোচনা করুন' : 'Review Now'}</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
