@@ -335,12 +335,12 @@ export default function LandingPage() {
     { q: isEn ? 'How are deposits recorded?' : 'ডিপোজিট কীভাবে রেকর্ড হয়?', a: isEn ? "Managers log deposits on behalf of members (Cash, bKash, Nagad, Rocket). The entry appears instantly in the member's passbook and updates their running balance." : 'ম্যানেজার সদস্যের পক্ষে জমা লগ করেন। এন্ট্রি তাৎক্ষণিকভাবে পাসবুকে যুক্ত হয় এবং ব্যালেন্স আপডেট হয়।' },
     { q: isEn ? 'How is the month-end settlement calculated?' : 'মাস শেষে হিসাব কীভাবে করা হয়?', a: isEn ? 'Final Balance = Total Deposits − (Total Meals × Meal Rate). Positive = advance credit, Negative = amount owed. Auto-generated at any time.' : 'চূড়ান্ত ব্যালেন্স = মোট জমা − (মোট মিল × মিল রেট)। ইতিবাচক = অগ্রিম, নেতিবাচক = বকেয়া।' },
     { q: isEn ? 'Can a user manage multiple messes?' : 'একাধিক মেস পরিচালনা করা যাবে?', a: isEn ? 'Yes. One account can be linked to multiple messes. Switch between them seamlessly — ideal for managers overseeing multiple floors or blocks.' : 'হ্যাঁ। একটি অ্যাকাউন্ট একাধিক মেসের সাথে লিঙ্ক করা যায়। সহজেই এক মেস থেকে আরেক মেসে স্যুইচ করুন।' },
-    { q: isEn ? 'Is there a subscription or payment required?' : 'কোনো সাবস্ক্রিপশন বা পেমেন্ট লাগবে?', a: isEn ? 'No. NL Mess Pro is 100% free to use. Sign in with your Google account and start managing your mess immediately — no credit card, no fees.' : 'না। এনএল মেস প্রো সম্পূর্ণ বিনামূল্যে। গুগল অ্যাকাউন্টে সাইন ইন করুন এবং তাৎক্ষণিক ব্যবহার শুরু করুন।' },
+    { q: isEn ? 'Is there a subscription or payment required?' : 'কোনো সাবস্ক্রিপশন বা পেমেন্ট লাগবে?', a: isEn ? 'No. NL Mess Pro is 100% free to use. Sign in with your Google account and start managing your mess immediately — no credit card, no fees.' : 'না। এনএল মেস প্রো সম্পূর্ণ বিনামূল্যে। গুগল অ্যাকাউ অ্যাকাউন্টে সাইন ইন করুন এবং তাৎক্ষণিক ব্যবহার শুরু করুন।' },
   ];
 
   /* ─── Render ─── */
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
 
       {/* ── HEADER ── */}
       <header className="sticky top-0 z-50 bg-white/75 dark:bg-[#0b0f19]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
@@ -352,15 +352,15 @@ export default function LandingPage() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
+            <button aria-label="Toggle language" onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer">
               <Globe className="w-4 h-4" /><span>{language === 'en' ? 'বাং' : 'EN'}</span>
             </button>
-            <button onClick={toggleTheme} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition text-slate-500 cursor-pointer">
+            <button aria-label="Toggle theme" onClick={toggleTheme} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition text-slate-500 cursor-pointer">
               {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
             {user
-              ? <button onClick={() => navigate('/dashboard')} className="bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-md cursor-pointer">{t.goToDash}</button>
-              : <button onClick={() => navigate('/login')} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-md shadow-blue-500/10 cursor-pointer">{t.getStarted}</button>}
+              ? <button aria-label="Go to Dashboard" onClick={() => navigate('/dashboard')} className="bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-md cursor-pointer">{t.goToDash}</button>
+              : <button aria-label="Get Started" onClick={() => navigate('/login')} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-md shadow-blue-500/10 cursor-pointer">{t.getStarted}</button>}
           </div>
         </div>
       </header>
@@ -377,10 +377,10 @@ export default function LandingPage() {
           <p className="text-slate-500 dark:text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-semibold">{t.heroSub}</p>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
             {user
-              ? <button onClick={() => navigate('/dashboard')} className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white font-bold rounded-2xl transition shadow-lg cursor-pointer flex items-center justify-center gap-2">{t.goToDash} <ArrowRight className="w-4 h-4" /></button>
+              ? <button aria-label="Go to Dashboard" onClick={() => navigate('/dashboard')} className="w-full sm:w-auto px-8 py-4 bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white font-bold rounded-2xl transition shadow-lg cursor-pointer flex items-center justify-center gap-2">{t.goToDash} <ArrowRight className="w-4 h-4" /></button>
               : <>
-                  <button onClick={() => navigate('/login')} className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition shadow-lg shadow-blue-500/20 cursor-pointer flex items-center justify-center gap-2">{t.getStarted} <ArrowRight className="w-4 h-4" /></button>
-                  <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition">{t.exploreFeatures}</button>
+                  <button aria-label="Get Started" onClick={() => navigate('/login')} className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition shadow-lg shadow-blue-500/20 cursor-pointer flex items-center justify-center gap-2">{t.getStarted} <ArrowRight className="w-4 h-4" /></button>
+                  <button aria-label="Explore Features" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition">{t.exploreFeatures}</button>
                 </>}
           </div>
           <div className="pt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-bold text-slate-400 dark:text-slate-500">
@@ -406,7 +406,7 @@ export default function LandingPage() {
             ].map(({ label, min, max, step, val, set }, i) => (
               <div key={i}>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{label}</label>
-                <input type="range" min={min} max={max} step={step} value={val} onChange={e => set(+e.target.value)} className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+                <input aria-label={label.split(' — ')[0]} type="range" min={min} max={max} step={step} value={val} onChange={e => set(+e.target.value)} className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" />
               </div>
             ))}
             <div className="grid grid-cols-2 gap-4">
@@ -416,7 +416,7 @@ export default function LandingPage() {
               ].map(({ label, val, set }, i) => (
                 <div key={i}>
                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{label}</label>
-                  <input type="number" value={val} onChange={e => set(+(e.target.value) || 0)} className="w-full border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-bold focus:ring-2 focus:ring-blue-500/20 outline-none" />
+                  <input aria-label={label} type="number" value={val} onChange={e => set(+(e.target.value) || 0)} className="w-full border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-bold focus:ring-2 focus:ring-blue-500/20 outline-none" />
                 </div>
               ))}
             </div>
@@ -718,7 +718,7 @@ export default function LandingPage() {
             const open = openFaq === i;
             return (
               <div key={i} className="bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden">
-                <button onClick={() => setOpenFaq(open ? null : i)} className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-sm text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer">
+                <button aria-label="Toggle FAQ" onClick={() => setOpenFaq(open ? null : i)} className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-sm text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer">
                   <span>{faq.q}</span>
                   <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${open ? 'rotate-180' : ''}`} />
                 </button>
