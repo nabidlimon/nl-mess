@@ -12,29 +12,38 @@ service cloud.firestore {
       return isSignedIn() && request.auth.token.email == 'nabidahamed2003@gmail.com';
     }
 
-    function isManager() {
-      return isSignedIn() && (
-        isSupremeAdmin() || (
-          exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'Manager'
-        )
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isMemberOf(messId) {
+      return isSupremeAdmin() || (isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && messId in getUserData().messIds);
+    }
+
+    function isManagerOf(messId) {
+      return isSupremeAdmin() || (
+        isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        messId in getUserData().memberships && 
+        getUserData().memberships[messId].role == 'Manager'
       );
     }
 
-    function isMessAuthority() {
-      return isSignedIn() && (
-        isSupremeAdmin() || (
-          exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'Manager' || 
-           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'MealManager')
-        )
+    function isMessAuthorityOf(messId) {
+      return isSupremeAdmin() || (
+        isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        messId in getUserData().memberships && 
+        (getUserData().memberships[messId].role == 'Manager' || getUserData().memberships[messId].role == 'MealManager')
       );
     }
 
     // Users Collection
     match /users/{userId} {
-      allow read: if true;
-      allow write: if isSignedIn() && (request.auth.uid == userId || isMessAuthority());
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isSupremeAdmin() || isManagerOf(resource.data.messId));
+      allow delete: if isSupremeAdmin();
     }
 
     // Generic rule for all other collections - Granting Supreme Admin "God Mode"
@@ -50,57 +59,66 @@ service cloud.firestore {
         isSupremeAdmin() ||
         (request.auth.uid in resource.data.get('managerIds', [])) || 
         (resource.data.get('managerId', '') == request.auth.uid) || 
-        isManager()
+        isManagerOf(messId)
       );
     }
 
     // Meals Collection
     match /meals/{mealId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn() && isMemberOf(resource.data.messId);
+      allow create: if isSignedIn() && isMemberOf(request.resource.data.messId);
+      allow update, delete: if isSignedIn() && (isMemberOf(resource.data.messId) && (request.auth.uid == resource.data.memberId || isMessAuthorityOf(resource.data.messId)));
     }
 
     // Deposits Collection
     match /deposits/{depositId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn() && isMemberOf(resource.data.messId);
+      allow create: if isSignedIn() && isMemberOf(request.resource.data.messId);
+      allow update, delete: if isSignedIn() && isManagerOf(resource.data.messId);
     }
 
     // Bazar Costs Collection
     match /bazarCosts/{costId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn() && isMemberOf(resource.data.messId);
+      allow create: if isSignedIn() && isMemberOf(request.resource.data.messId);
+      allow update, delete: if isSignedIn() && isMessAuthorityOf(resource.data.messId);
     }
 
     // Rent Payments Collection
     match /rentPayments/{rentId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn() && isMemberOf(resource.data.messId);
+      allow create, update, delete: if isSignedIn() && isManagerOf(request.resource.data.messId);
     }
 
     // Essential Costs Collection
     match /essentialCosts/{costId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn() && isMemberOf(resource.data.messId);
+      allow create, update, delete: if isSignedIn() && isManagerOf(request.resource.data.messId);
     }
 
     // Settings Collection
     match /settings/{settingId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn() && isMemberOf(settingId);
+      allow create, update, delete: if isSignedIn() && isManagerOf(settingId);
     }
 
     // Notices Collection
     match /notices/{noticeId} {
-      allow read: if isSignedIn();
-      allow write: if isMessAuthority();
+      allow read: if isSignedIn() && isMemberOf(resource.data.messId);
+      allow create, update, delete: if isSignedIn() && isMessAuthorityOf(request.resource.data.messId);
     }
 
     // Notifications Collection
     match /notifications/{notificationId} {
-      allow read: if isSignedIn();
+      allow read: if isSignedIn() && isMemberOf(resource.data.messId);
       allow write: if isSignedIn();
     }
 
     // ChatMessages Collection
     match /chatMessages/{messageId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
-      allow update, delete: if isSignedIn() && (isSupremeAdmin() || resource.data.senderId == request.auth.uid);
+      allow read: if isSignedIn() && isMemberOf(resource.data.messId);
+      allow create: if isSignedIn() && isMemberOf(request.resource.data.messId) && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isSignedIn() && (isSupremeAdmin() || (resource.data.senderId == request.auth.uid && isMemberOf(resource.data.messId)));
     }
 
     // Presence Collection
@@ -111,9 +129,9 @@ service cloud.firestore {
 
     // Polls Collection
     match /polls/{pollId} {
-      allow read: if isSignedIn();
-      allow create, delete: if isMessAuthority();
-      allow update: if isSignedIn();
+      allow read: if isSignedIn() && isMemberOf(resource.data.messId);
+      allow create, delete: if isSignedIn() && isMessAuthorityOf(request.resource.data.messId);
+      allow update: if isSignedIn() && isMemberOf(resource.data.messId);
     }
   }
 }
