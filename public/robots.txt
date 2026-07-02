@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nabidlimon.github.io/nl-mess/sitemap.xml
+Sitemap: https://nl-mess.vercel.app/sitemap.xml
