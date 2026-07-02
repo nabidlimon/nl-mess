@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, query, onSnapshot, writeBatch, doc, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Member, Meal } from '../types';
-import { Save, ChevronLeft, ChevronRight, Check, X, Clock, AlertCircle, Users } from 'lucide-react';
+import { Save, ChevronLeft, ChevronRight, Check, X, Clock, AlertCircle, Users, Sun, Sunrise, Moon, Ban } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, getDaysInMonth, addMonths, subMonths, parse, addDays } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -21,6 +21,17 @@ export default function Meals() {
   const [editedMeals, setEditedMeals] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [pendingRequests, setPendingRequests] = useState<Meal[]>([]);
+
+  // Modal State
+  const [activeModal, setActiveModal] = useState<{
+    memberId: string;
+    memberName: string;
+    day: number;
+    dateStr: string;
+    morning: boolean;
+    lunch: boolean;
+    dinner: boolean;
+  } | null>(null);
 
   // Fetch pending guest meal requests
   useEffect(() => {
@@ -145,6 +156,10 @@ export default function Meals() {
       where('role', 'in', ['Manager', 'Border', 'MealManager'])
     ), (snapshot) => {
       let fetchedMembers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Member));
+      
+      // Filter out the supreme admin
+      fetchedMembers = fetchedMembers.filter(m => m.email !== 'nabidahamed2003@gmail.com');
+      
       fetchedMembers.sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -203,6 +218,14 @@ export default function Meals() {
       if (!isAdmin) {
         if (memberId !== userProfile?.id) return;
         if (dateStr <= todayStr) return;
+        
+        const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+        if (dateStr === tomorrowStr) {
+           const now = new Date();
+           if (now.getHours() >= 22) {
+               return; // Past 10 PM
+           }
+        }
       }
 
       const key = `${memberId}_${dateStr}`;
@@ -275,6 +298,39 @@ export default function Meals() {
     if (val === '0' || val === '') return '';
     if (val.endsWith('.')) return val.slice(0, -1);
     return val;
+  };
+
+  const openMealModal = (member: Member, day: number, val: string, isReadOnly: boolean) => {
+    if (isReadOnly) return;
+    const { morning, lunch, dinner } = parseMealFlags(val);
+    setActiveModal({
+      memberId: member.id,
+      memberName: member.name,
+      day,
+      dateStr: `${monthStr}-${String(day).padStart(2, '0')}`,
+      morning,
+      lunch,
+      dinner
+    });
+  };
+
+  const handleModalSave = () => {
+    if (!activeModal) return;
+    
+    let valStr = '0';
+    const { morning, lunch, dinner } = activeModal;
+    
+    if (morning && lunch && dinner) valStr = '2.5';
+    else if (!morning && lunch && dinner) valStr = '2';
+    else if (morning && lunch && !dinner) valStr = '1.5D';
+    else if (morning && !lunch && dinner) valStr = '1.5N';
+    else if (!morning && lunch && !dinner) valStr = '1D';
+    else if (!morning && !lunch && dinner) valStr = '1N';
+    else if (morning && !lunch && !dinner) valStr = '0.5';
+    else valStr = '0'; // mealOff
+    
+    handleMealChange(activeModal.memberId, activeModal.day, valStr);
+    setActiveModal(null);
   };
 
   const saveChanges = async () => {
@@ -575,16 +631,28 @@ export default function Meals() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto excel-table-container">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden relative">
+        <div className="overflow-auto max-h-[70vh] excel-table-container">
           <table className="min-w-full divide-y divide-slate-200 border-collapse">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-30 shadow-sm">
               <tr>
-                <th className="sticky left-0 z-20 bg-slate-50 px-2 md:px-4 py-3 text-left text-[10px] uppercase font-bold text-slate-500 tracking-wider border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.05)]">{t('meals.member')}</th>
-                {Array.from({ length: daysInMonth }).map((_, i) => (
-                  <th key={i} className="px-1 md:px-2 py-3 text-center text-[10px] font-bold text-slate-500 border-r border-slate-200 min-w-[44px] md:min-w-[48px]">{i + 1}</th>
-                ))}
-                <th className="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-blue-900 bg-blue-50 md:sticky right-auto md:right-0 z-20 md:shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.05)]">{t('meals.total')}</th>
+                <th className="sticky left-0 z-40 bg-slate-50 px-2 md:px-4 py-3 text-left text-[10px] uppercase font-bold text-slate-500 tracking-wider border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.05)]">{t('meals.member')}</th>
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const day = i + 1;
+                  const dateStr = `${monthStr}-${String(day).padStart(2, '0')}`;
+                  const currentCellDate = parse(dateStr, 'yyyy-MM-dd', new Date());
+                  const isToday = dateStr === format(new Date(), 'yyyy-MM-dd');
+                  const isFriday = currentCellDate.getDay() === 5;
+                  
+                  return (
+                    <th key={i} className={`px-1 md:px-2 py-3 text-center text-[10px] font-bold border-r border-slate-200 min-w-[44px] md:min-w-[48px] ${
+                      isToday ? 'bg-blue-100 text-blue-700 border-b-2 border-b-blue-500' : isFriday ? 'bg-slate-100 text-slate-600' : 'text-slate-500'
+                    }`}>
+                      {day}
+                    </th>
+                  );
+                })}
+                <th className="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-blue-900 bg-blue-50 md:sticky right-auto md:right-0 z-40 md:shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.05)]">{t('meals.total')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
@@ -600,7 +668,23 @@ export default function Meals() {
                     const isEdited = editedMeals[`${member.id}_${dateStr}`] !== undefined;
                     
                     const todayStr = format(new Date(), 'yyyy-MM-dd');
-                    const isReadOnly = !isAdmin && (member.id !== userProfile?.id || dateStr <= todayStr);
+                    const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+                    
+                    let isReadOnly = !isAdmin && member.id !== userProfile?.id;
+                    if (!isAdmin && member.id === userProfile?.id) {
+                      if (dateStr <= todayStr) {
+                        isReadOnly = true;
+                      } else if (dateStr === tomorrowStr) {
+                        const now = new Date();
+                        if (now.getHours() >= 22) {
+                          isReadOnly = true;
+                        }
+                      }
+                    }
+
+                    const currentCellDate = parse(dateStr, 'yyyy-MM-dd', new Date());
+                    const isToday = dateStr === todayStr;
+                    const isFriday = currentCellDate.getDay() === 5;
 
                     const key = `${member.id}_${dateStr}`;
                     const mDoc = mealMap[key];
@@ -610,19 +694,32 @@ export default function Meals() {
                     const isInherited = isMealInherited(member.id, day) && val !== '';
 
                     return (
-                      <td key={i} className={`p-0 border-r border-slate-100 relative ${isEdited ? 'bg-yellow-50/50' : ''} ${isInherited ? 'bg-slate-55/10 dark:bg-slate-950/10' : ''}`}>
-                        <input
-                          type="text"
-                          value={val}
-                          readOnly={isReadOnly}
-                          placeholder="0"
-                          onChange={(e) => handleMealChange(member.id, day, e.target.value)}
-                          className={`w-full h-full min-h-[44px] text-center text-sm font-mono border-none bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-600 outline-none ${
-                            isReadOnly ? 'cursor-default text-slate-500' : 'cursor-text hover:bg-slate-50/40 font-medium'
+                      <td 
+                        key={i} 
+                        title={`${member.name} - ${dateStr}`}
+                        onClick={() => openMealModal(member, day, val, isReadOnly)}
+                        className={`p-0 border-r border-slate-100 relative transition-colors ${
+                          isEdited ? 'bg-yellow-50/50' : ''
+                        } ${
+                          isInherited ? 'bg-slate-55/10 dark:bg-slate-950/10' : ''
+                        } ${
+                          isReadOnly ? 'bg-slate-50/40 cursor-not-allowed group' : 'cursor-pointer hover:bg-blue-50/60'
+                        } ${
+                          isToday ? 'bg-blue-50/20' : ''
+                        } ${
+                          isFriday && !isToday ? 'bg-slate-50/40' : ''
+                        }`}
+                      >
+                        <div
+                          className={`w-full h-full min-h-[44px] flex items-center justify-center text-sm font-mono outline-none ${
+                            isReadOnly ? 'text-slate-400' : 'font-medium'
                           } ${
                             isInherited ? 'text-slate-450 dark:text-slate-550 italic font-normal' : 'text-slate-900 dark:text-slate-100 font-bold'
                           }`}
-                        />
+                        >
+                          {val || '0'}
+                        </div>
+                        
                         
                         {/* Guest meal badges */}
                         {approvedGuestTotal > 0 && (
@@ -707,6 +804,73 @@ export default function Meals() {
           </table>
         </div>
       </div>
+
+      {/* Modal for Meal Entry */}
+      {activeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl max-w-md w-full animate-in zoom-in-95 duration-200 border border-slate-200">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">{language === 'bn' ? 'মিল আপডেট' : 'Update Meal'}</h2>
+              <button 
+                onClick={() => setActiveModal(null)}
+                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm font-semibold text-slate-500 mb-6">
+              {activeModal.memberName} • {activeModal.dateStr}
+            </p>
+
+            <div className="grid grid-cols-3 gap-3 mb-8">
+              <button
+                onClick={() => setActiveModal(prev => prev ? { ...prev, morning: !prev.morning } : null)}
+                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer hover:border-amber-200 ${
+                  activeModal.morning 
+                    ? 'border-amber-400 bg-amber-50 text-amber-700' 
+                    : 'border-slate-100 bg-white text-slate-400'
+                }`}
+              >
+                <Sunrise className={`w-8 h-8 mb-2 ${activeModal.morning ? 'text-amber-500' : 'text-slate-300'}`} />
+                <span className="font-semibold text-sm">Morning</span>
+                <span className="text-[10px] opacity-70">0.5 Meal</span>
+              </button>
+              <button
+                onClick={() => setActiveModal(prev => prev ? { ...prev, lunch: !prev.lunch } : null)}
+                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer hover:border-orange-200 ${
+                  activeModal.lunch 
+                    ? 'border-orange-400 bg-orange-50 text-orange-700' 
+                    : 'border-slate-100 bg-white text-slate-400'
+                }`}
+              >
+                <Sun className={`w-8 h-8 mb-2 ${activeModal.lunch ? 'text-orange-500' : 'text-slate-300'}`} />
+                <span className="font-semibold text-sm">Lunch</span>
+                <span className="text-[10px] opacity-70">1.0 Meal</span>
+              </button>
+              <button
+                onClick={() => setActiveModal(prev => prev ? { ...prev, dinner: !prev.dinner } : null)}
+                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer hover:border-indigo-200 ${
+                  activeModal.dinner 
+                    ? 'border-indigo-400 bg-indigo-50 text-indigo-700' 
+                    : 'border-slate-100 bg-white text-slate-400'
+                }`}
+              >
+                <Moon className={`w-8 h-8 mb-2 ${activeModal.dinner ? 'text-indigo-500' : 'text-slate-300'}`} />
+                <span className="font-semibold text-sm">Dinner</span>
+                <span className="text-[10px] opacity-70">1.0 Meal</span>
+              </button>
+            </div>
+
+            <button
+              onClick={handleModalSave}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Check className="w-5 h-5" />
+              {language === 'bn' ? 'সংরক্ষণ করুন' : 'Save Meal Entry'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

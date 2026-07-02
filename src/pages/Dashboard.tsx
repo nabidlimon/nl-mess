@@ -33,9 +33,16 @@ export default function Dashboard() {
   const [themeStyle, setThemeStyle] = useState('');
   const [GreetingIcon, setGreetingIcon] = useState<any>(Sun);
   
-  // Tomorrow's meal state
   const [tomorrowMeal, setTomorrowMeal] = useState<{morning: boolean, lunch: boolean, dinner: boolean, mealOff: boolean} | null>(null);
   const [timeLeftStr, setTimeLeftStr] = useState('');
+
+  const isMessManager = (currentMess?.managerIds || []).includes(userProfile?.id || '');
+  const isOverallManager = isMessManager || isSupreme || userProfile?.role === 'Manager';
+  const isMealManager = userProfile?.role === 'MealManager';
+  const isAdmin = isOverallManager || isMealManager;
+
+  const nowTime = new Date();
+  const isPastDeadline = !isAdmin && nowTime.getHours() >= 22;
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -139,7 +146,7 @@ export default function Dashboard() {
   }, [currentMess, userProfile]);
 
   const handleToggleTomorrowMeal = async (segment: 'morning' | 'lunch' | 'dinner' | 'off') => {
-    if (!currentMess || !userProfile) return;
+    if (!currentMess || !userProfile || isPastDeadline) return;
     const tomorrow = addDays(new Date(), 1);
     const dateStr = format(tomorrow, 'yyyy-MM-dd');
 
@@ -231,11 +238,6 @@ export default function Dashboard() {
   const myMeals = userProfile ? getMemberMealsForMonth(userProfile.id, currentMonthPrefix) : 0;
   const myCost = myMeals * mealRate;
   const myBalance = myDeposits - myCost;
-
-  const isMessManager = (currentMess?.managerIds || []).includes(userProfile?.id || '');
-  const isOverallManager = isMessManager || isSupreme || userProfile?.role === 'Manager';
-  const isMealManager = userProfile?.role === 'MealManager';
-  const isAdmin = isOverallManager || isMealManager;
 
   // Today's Mess Overview stats (Manager view)
   const todayDateStr = format(new Date(), 'yyyy-MM-dd');
@@ -727,29 +729,33 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-4 gap-2 mb-4 relative z-10">
              <button
+                disabled={isPastDeadline}
                 onClick={() => handleToggleTomorrowMeal('morning')}
-                className={cn("flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer", tomorrowMeal?.morning ? "border-amber-400 bg-amber-50 text-amber-800" : "border-slate-100 bg-slate-50 text-slate-500")}
+                className={cn(`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.morning ? "border-amber-400 bg-amber-50 text-amber-800" : "border-slate-100 bg-slate-50 text-slate-500")}
              >
                 <Sunrise className="w-5 h-5 mb-1" />
                 <span className="text-[10px] font-bold">{language === 'bn' ? 'সকাল' : 'Morning'}</span>
              </button>
              <button
+                disabled={isPastDeadline}
                 onClick={() => handleToggleTomorrowMeal('lunch')}
-                className={cn("flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer", tomorrowMeal?.lunch ? "border-orange-400 bg-orange-50 text-orange-800" : "border-slate-100 bg-slate-50 text-slate-500")}
+                className={cn(`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.lunch ? "border-orange-400 bg-orange-50 text-orange-800" : "border-slate-100 bg-slate-50 text-slate-500")}
              >
                 <Sun className="w-5 h-5 mb-1" />
                 <span className="text-[10px] font-bold">{language === 'bn' ? 'দুপুর' : 'Lunch'}</span>
              </button>
              <button
+                disabled={isPastDeadline}
                 onClick={() => handleToggleTomorrowMeal('dinner')}
-                className={cn("flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer", tomorrowMeal?.dinner ? "border-indigo-400 bg-indigo-50 text-indigo-800" : "border-slate-100 bg-slate-50 text-slate-500")}
+                className={cn(`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.dinner ? "border-indigo-400 bg-indigo-50 text-indigo-800" : "border-slate-100 bg-slate-50 text-slate-500")}
              >
                 <Moon className="w-5 h-5 mb-1" />
                 <span className="text-[10px] font-bold">{language === 'bn' ? 'রাত' : 'Dinner'}</span>
              </button>
              <button
+                disabled={isPastDeadline}
                 onClick={() => handleToggleTomorrowMeal('off')}
-                className={cn("flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer", tomorrowMeal?.mealOff ? "border-rose-400 bg-rose-50 text-rose-800" : "border-slate-100 bg-slate-50 text-slate-500")}
+                className={cn(`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.mealOff ? "border-rose-400 bg-rose-50 text-rose-800" : "border-slate-100 bg-slate-50 text-slate-500")}
              >
                 <Ban className="w-5 h-5 mb-1" />
                 <span className="text-[10px] font-bold">{language === 'bn' ? 'বন্ধ' : 'Off'}</span>
@@ -757,8 +763,12 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
-             <Info className="w-4 h-4 text-blue-500 shrink-0" />
-             <p>{language === 'bn' ? 'ক্লিক করে মিল চালু বা বন্ধ করুন। স্বয়ংক্রিয়ভাবে সেভ হবে।' : 'Click to toggle your meals. Auto-saves instantly.'}</p>
+             <Info className={cn("w-4 h-4 shrink-0", isPastDeadline ? "text-red-500" : "text-blue-500")} />
+             <p className={isPastDeadline ? "text-red-600 dark:text-red-400" : ""}>
+               {isPastDeadline 
+                 ? (language === 'bn' ? 'রাত ১০টার পর আগামীকালের মিল পরিবর্তন করা যাবে না।' : 'You cannot change tomorrow\'s meal after 10:00 PM.') 
+                 : (language === 'bn' ? 'ক্লিক করে মিল চালু বা বন্ধ করুন। স্বয়ংক্রিয়ভাবে সেভ হবে।' : 'Click to toggle your meals. Auto-saves instantly.')}
+             </p>
           </div>
         </div>
       </div>

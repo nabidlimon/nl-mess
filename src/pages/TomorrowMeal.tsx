@@ -7,11 +7,18 @@ import { format, addDays } from 'date-fns';
 import { Check, Sunrise, Sun, Moon, Plus, Minus, Users } from 'lucide-react';
 
 export default function TomorrowMeal() {
-  const { currentMess, userProfile } = useAuth();
+  const { currentMess, userProfile, isSupreme } = useAuth();
   const { t, language } = useLanguage();
   const [morning, setMorning] = useState(false);
   const [lunch, setLunch] = useState(false);
   const [dinner, setDinner] = useState(false);
+
+  const isMessManager = (currentMess?.managerIds || []).includes(userProfile?.id || '');
+  const isMealManager = userProfile?.role === 'MealManager';
+  const isAdmin = isMessManager || isMealManager || isSupreme;
+
+  const now = new Date();
+  const isPastDeadline = !isAdmin && now.getHours() >= 22;
 
   // Guest meals state
   const [pendingGuestMorning, setPendingGuestMorning] = useState(0);
@@ -267,6 +274,14 @@ export default function TomorrowMeal() {
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 text-center font-display">{t('tomorrow_meals.title')}</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 text-center font-semibold">{t('tomorrow_meals.subtitle')}</p>
 
+        {isPastDeadline && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-xl text-center">
+            <p className="text-sm font-bold text-red-600 dark:text-red-400">
+              {language === 'bn' ? 'রাত ১০টার পর আগামীকালের মিল পরিবর্তন করা যাবে না।' : 'You cannot change tomorrow\'s meal after 10:00 PM.'}
+            </p>
+          </div>
+        )}
+
         {/* Section 1: Member's Own Meal */}
         <div className="mb-6">
           <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 border-b border-slate-100 dark:border-slate-800 pb-1.5">
@@ -274,11 +289,12 @@ export default function TomorrowMeal() {
           </p>
           <div className="grid grid-cols-3 gap-3">
             <button
+              disabled={isPastDeadline}
               onClick={() => setMorning(!morning)}
-              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-amber-200'} ${
                 morning 
                   ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400' 
-                  : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-400 dark:text-slate-500 hover:border-amber-200'
+                  : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-400 dark:text-slate-500'
               }`}
             >
               <Sunrise className={`w-8 h-8 mb-2 ${morning ? 'text-amber-500' : 'text-slate-300'}`} />
@@ -286,11 +302,12 @@ export default function TomorrowMeal() {
               <span className="text-[10px] opacity-70">0.5 Meal</span>
             </button>
             <button
+              disabled={isPastDeadline}
               onClick={() => setLunch(!lunch)}
-              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-orange-200'} ${
                 lunch 
                   ? 'border-orange-400 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400' 
-                  : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-400 dark:text-slate-500 hover:border-orange-200'
+                  : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-400 dark:text-slate-500'
               }`}
             >
               <Sun className={`w-8 h-8 mb-2 ${lunch ? 'text-orange-500' : 'text-slate-300'}`} />
@@ -298,11 +315,12 @@ export default function TomorrowMeal() {
               <span className="text-[10px] opacity-70">1.0 Meal</span>
             </button>
             <button
+              disabled={isPastDeadline}
               onClick={() => setDinner(!dinner)}
-              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-indigo-200'} ${
                 dinner 
                   ? 'border-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400' 
-                  : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-955 text-slate-400 dark:text-slate-500 hover:border-indigo-200'
+                  : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-955 text-slate-400 dark:text-slate-500'
               }`}
             >
               <Moon className={`w-8 h-8 mb-2 ${dinner ? 'text-indigo-500' : 'text-slate-300'}`} />
@@ -359,8 +377,8 @@ export default function TomorrowMeal() {
 
         <button
           onClick={handleUpdate}
-          disabled={loading}
-          className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition cursor-pointer flex items-center justify-center gap-2"
+          disabled={loading || isPastDeadline}
+          className={`w-full font-medium py-3 rounded-xl transition flex items-center justify-center gap-2 ${isPastDeadline ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white cursor-pointer'}`}
         >
           {loading ? t('common.saving') : t('tomorrow_meals.update_btn')}
         </button>

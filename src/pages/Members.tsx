@@ -35,12 +35,16 @@ export default function Members() {
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Member));
-      data.sort((a, b) => {
+      
+      // Filter out the supreme admin so they do not appear in the border list
+      const filteredData = data.filter(m => m.email !== 'nabidahamed2003@gmail.com');
+
+      filteredData.sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return timeA - timeB;
       });
-      setMembers(data);
+      setMembers(filteredData);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching members:', error);
