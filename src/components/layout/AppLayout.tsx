@@ -227,6 +227,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         {/* Collapse toggle */}
         <button
+          aria-label="Toggle sidebar"
           onClick={() => setCollapsed(!collapsed)}
           className="absolute -right-3 top-[72px] w-6 h-6 bg-slate-800 border border-slate-700 rounded-full hidden md:flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all cursor-pointer shadow-md z-50"
         >

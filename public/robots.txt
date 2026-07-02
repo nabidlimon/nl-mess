@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nabidlimon.github.io/nl-mess/sitemap.xml
