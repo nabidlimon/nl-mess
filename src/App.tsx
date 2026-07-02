@@ -13,7 +13,7 @@ import { AppLoadingScreen } from './components/AppLoadingScreen';
 import { useLanguage } from './contexts/LanguageContext';
 
 const Login = lazy(() => import('./pages/Login'));
-const LandingPage = lazy(() => import('./pages/LandingPage'));
+import LandingPage from './pages/LandingPage';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Members = lazy(() => import('./pages/Members'));
@@ -114,8 +114,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 // Smart root component declared globally to prevent reconciliation issues/unmounting
 function SmartRoot() {
-  const { user, loading } = useAuth();
-  if (loading) return <AppLoadingScreen />;
+  const { user } = useAuth();
   if (user) return <Navigate to="/dashboard" replace />;
   return <LandingPage />;
 }

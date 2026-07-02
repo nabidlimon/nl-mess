@@ -205,7 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, userProfile, currentMess, managedMesses, loading, signInWithGoogle, logout, refreshProfile, isSupreme, hasEntered, setHasEntered }}>
-      {loading ? <AppLoadingScreen /> : children}
+      {children}
     </AuthContext.Provider>
   );
 }
