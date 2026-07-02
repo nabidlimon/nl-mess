@@ -14,13 +14,22 @@ export default defineConfig(() => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-            'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
-            'vendor-utils': ['jspdf', 'jspdf-autotable', 'html2canvas', 'xlsx', 'recharts', 'framer-motion', 'date-fns']
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react')) return 'vendor-react';
+              if (id.includes('firebase')) return 'vendor-firebase';
+              if (id.includes('jspdf')) return 'vendor-pdf';
+              if (id.includes('xlsx')) return 'vendor-excel';
+              if (id.includes('recharts')) return 'vendor-charts';
+              if (id.includes('lucide-react')) return 'vendor-icons';
+              if (id.includes('framer-motion')) return 'vendor-motion';
+              if (id.includes('date-fns')) return 'vendor-date';
+              return 'vendor-core';
+            }
           }
         }
-      }
+      },
+      chunkSizeWarningLimit: 1000
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
