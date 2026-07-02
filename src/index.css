@@ -5,6 +5,48 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: "Space Grotesk", var(--font-sans);
   --font-mono: "Fira Code", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom Colors from Stitch Proposal */
+  --color-primary: #00175c;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #00288e;
+  --color-on-primary-container: #7e97fe;
+  
+  --color-secondary: #00668a;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #8dd5fe;
+  --color-on-secondary-container: #005d7e;
+  
+  --color-tertiary: #3e1000;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #611e00;
+  --color-on-tertiary-container: #e6835b;
+
+  --color-background: #faf8ff;
+  --color-on-background: #131b2e;
+  
+  --color-surface: #faf8ff;
+  --color-on-surface: #131b2e;
+  --color-surface-variant: #dae2fc;
+  --color-on-surface-variant: #444652;
+  
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f3ff;
+  --color-surface-container: #eaedff;
+  --color-surface-container-high: #e1e7ff;
+  --color-surface-container-highest: #dae2fc;
+  
+  --color-surface-border: #E2E8F0;
+  --color-outline: #757684;
+  --color-outline-variant: #c5c5d4;
+  
+  --color-inverse-surface: #283044;
+  --color-inverse-on-surface: #eef0ff;
+  --color-inverse-primary: #b8c4ff;
+  
+  --color-status-success: #10B981;
+  --color-status-error: #EF4444;
+  --color-status-warning: #F59E0B;
 }
 
 body {
@@ -88,6 +130,18 @@ input[type="number"] {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .glass-card {
+  background: rgba(17, 24, 39, 0.85);
+  border-color: rgba(31, 41, 55, 0.8);
 }
 
 /* Screenshake animation for buzz alerts */

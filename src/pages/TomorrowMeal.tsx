@@ -210,9 +210,9 @@ export default function TomorrowMeal() {
     colorClass: string
   }) => {
     return (
-      <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-slate-100 dark:border-slate-850 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-950">
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 ${colorClass}`}>
+      <div className="flex items-center justify-between p-2.5 sm:p-3.5 bg-slate-50 dark:bg-slate-955/40 rounded-2xl border border-slate-100 dark:border-slate-850 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-950">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className={`p-1.5 sm:p-2 rounded-lg bg-white dark:bg-slate-900 shadow-sm border border-slate-100 dark:border-slate-800 ${colorClass}`}>
             <Icon className="w-5 h-5" />
           </div>
           <div>
@@ -270,8 +270,8 @@ export default function TomorrowMeal() {
 
   return (
     <div className="max-w-xl mx-auto space-y-6">
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-200">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 text-center font-display">{t('tomorrow_meals.title')}</h1>
+      <div className="bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-200">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 text-center font-display">{t('tomorrow_meals.title')}</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 text-center font-semibold">{t('tomorrow_meals.subtitle')}</p>
 
         {isPastDeadline && (
@@ -287,45 +287,45 @@ export default function TomorrowMeal() {
           <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 border-b border-slate-100 dark:border-slate-800 pb-1.5">
             {language === 'bn' ? 'আমার নিজের খাবার' : 'My Own Meal'}
           </p>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <button
               disabled={isPastDeadline}
               onClick={() => setMorning(!morning)}
-              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-amber-200'} ${
+              className={`flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-amber-200'} ${
                 morning 
                   ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400' 
                   : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-400 dark:text-slate-500'
               }`}
             >
-              <Sunrise className={`w-8 h-8 mb-2 ${morning ? 'text-amber-500' : 'text-slate-300'}`} />
-              <span className="font-semibold text-sm">Morning</span>
-              <span className="text-[10px] opacity-70">0.5 Meal</span>
+              <Sunrise className={`w-7 h-7 sm:w-8 sm:h-8 mb-1.5 sm:mb-2 ${morning ? 'text-amber-500' : 'text-slate-300'}`} />
+              <span className="font-semibold text-xs sm:text-sm">Morning</span>
+              <span className="text-[9px] sm:text-[10px] opacity-70">0.5 Meal</span>
             </button>
             <button
               disabled={isPastDeadline}
               onClick={() => setLunch(!lunch)}
-              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-orange-200'} ${
+              className={`flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-orange-200'} ${
                 lunch 
                   ? 'border-orange-400 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-400' 
                   : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-400 dark:text-slate-500'
               }`}
             >
-              <Sun className={`w-8 h-8 mb-2 ${lunch ? 'text-orange-500' : 'text-slate-300'}`} />
-              <span className="font-semibold text-sm">Lunch</span>
-              <span className="text-[10px] opacity-70">1.0 Meal</span>
+              <Sun className={`w-7 h-7 sm:w-8 sm:h-8 mb-1.5 sm:mb-2 ${lunch ? 'text-orange-500' : 'text-slate-300'}`} />
+              <span className="font-semibold text-xs sm:text-sm">Lunch</span>
+              <span className="text-[9px] sm:text-[10px] opacity-70">1.0 Meal</span>
             </button>
             <button
               disabled={isPastDeadline}
               onClick={() => setDinner(!dinner)}
-              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-indigo-200'} ${
+              className={`flex flex-col items-center justify-center p-2.5 sm:p-4 rounded-xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-indigo-200'} ${
                 dinner 
                   ? 'border-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400' 
                   : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-955 text-slate-400 dark:text-slate-500'
               }`}
             >
-              <Moon className={`w-8 h-8 mb-2 ${dinner ? 'text-indigo-500' : 'text-slate-300'}`} />
-              <span className="font-semibold text-sm">Dinner</span>
-              <span className="text-[10px] opacity-70">1.0 Meal</span>
+              <Moon className={`w-7 h-7 sm:w-8 sm:h-8 mb-1.5 sm:mb-2 ${dinner ? 'text-indigo-500' : 'text-slate-300'}`} />
+              <span className="font-semibold text-xs sm:text-sm">Dinner</span>
+              <span className="text-[9px] sm:text-[10px] opacity-70">1.0 Meal</span>
             </button>
           </div>
         </div>

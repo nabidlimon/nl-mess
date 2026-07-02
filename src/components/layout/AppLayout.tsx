@@ -113,7 +113,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <aside
         className={cn(
           'hidden md:flex flex-col h-full transition-all duration-300 ease-in-out z-40 relative',
-          'bg-slate-950 border-r border-slate-800/50 shadow-2xl shadow-black/20',
+          'bg-primary border-r border-outline-variant/10 shadow-2xl shadow-black/20',
           collapsed ? 'w-[68px]' : 'w-60'
         )}
       >
@@ -147,8 +147,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     'sidebar-nav-item relative group flex items-center gap-3 rounded-xl transition-all duration-150 cursor-pointer',
                     collapsed ? 'w-11 h-11 justify-center mx-auto' : 'px-3.5 py-2.5',
                     isActive
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                      : 'text-slate-400 hover:bg-slate-800/80 hover:text-slate-100'
+                      ? 'bg-secondary text-on-secondary shadow-lg shadow-secondary/25'
+                      : 'text-indigo-200 hover:bg-primary-container/20 hover:text-white'
                   )}
                 >
                   <item.icon className={cn('shrink-0', collapsed ? 'w-5 h-5' : 'w-4.5 h-4.5')} />
@@ -166,22 +166,22 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <div
             onClick={() => navigate('/profile')}
             className={cn(
-              'flex items-center rounded-xl cursor-pointer transition-all hover:bg-slate-800/80 mb-2',
+              'flex items-center rounded-xl cursor-pointer transition-all hover:bg-primary-container/20 mb-2',
               collapsed ? 'justify-center p-2.5' : 'gap-3 p-2.5'
             )}
             title={collapsed ? (userProfile?.name || 'Profile') : undefined}
           >
             {user?.photoURL ? (
-              <img src={user.photoURL} alt="User" className="w-8 h-8 rounded-lg object-cover shrink-0 ring-2 ring-blue-500/30" />
+              <img src={user.photoURL} alt="User" className="w-8 h-8 rounded-lg object-cover shrink-0 ring-2 ring-secondary/30" />
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white text-sm shrink-0 shadow-lg shadow-blue-600/20">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-secondary to-blue-600 flex items-center justify-center font-bold text-white text-sm shrink-0 shadow-lg shadow-secondary/20">
                 {userInitial}
               </div>
             )}
             {!collapsed && (
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-white truncate">{userProfile?.name || user?.displayName || 'User'}</p>
-                <p className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider truncate">{userRole}</p>
+                <p className="text-[10px] text-secondary-container font-semibold uppercase tracking-wider truncate">{userRole}</p>
               </div>
             )}
           </div>
@@ -189,7 +189,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <button
               onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}
               className={cn(
-                'sidebar-nav-item relative group flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer text-slate-400 hover:text-slate-100 hover:bg-slate-800',
+                'sidebar-nav-item relative group flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer text-indigo-200 hover:text-white hover:bg-primary-container/20',
                 collapsed ? 'w-11 h-9' : 'flex-1 h-9'
               )}
               title={language === 'en' ? 'Switch to Bangla' : 'Switch to English'}
@@ -201,7 +201,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <button
               onClick={toggleTheme}
               className={cn(
-                'sidebar-nav-item relative group flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer text-slate-400 hover:text-slate-100 hover:bg-slate-800',
+                'sidebar-nav-item relative group flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer text-indigo-200 hover:text-white hover:bg-primary-container/20',
                 collapsed ? 'w-11 h-9' : 'flex-1 h-9'
               )}
               title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
@@ -213,7 +213,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <button
               onClick={handleLogout}
               className={cn(
-                'sidebar-nav-item relative group flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer text-slate-400 hover:text-red-400 hover:bg-red-950/30',
+                'sidebar-nav-item relative group flex items-center justify-center gap-2 rounded-xl transition-all cursor-pointer text-indigo-200 hover:text-red-400 hover:bg-red-950/30',
                 collapsed ? 'w-11 h-9' : 'flex-1 h-9'
               )}
               title={t('nav.sign_out')}
@@ -239,21 +239,21 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
 
         {/* TOP BAR — desktop */}
-        <header className="hidden md:flex items-center justify-between h-16 px-6 bg-white dark:bg-slate-900 border-b border-slate-200/70 dark:border-slate-800/80 shadow-sm flex-shrink-0 z-30 transition-colors duration-200">
+        <header className="hidden md:flex items-center justify-between h-16 px-6 bg-surface/80 backdrop-blur-md sticky top-0 z-40 border-b border-surface-border flex-shrink-0 z-30 transition-colors duration-200">
           <div className="flex items-center gap-4">
             {currentMess && (
-              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3.5 py-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse" />
-                <span className="text-sm font-bold text-slate-700 dark:text-slate-200 max-w-[180px] truncate">{currentMess.name}</span>
+              <div className="flex items-center gap-2 bg-surface-container dark:bg-slate-800 border border-surface-border rounded-xl px-3.5 py-2">
+                <div className="w-2 h-2 rounded-full bg-status-success shadow-sm shadow-emerald-500/50 animate-pulse" />
+                <span className="text-sm font-bold text-primary dark:text-slate-200 max-w-[180px] truncate">{currentMess.name}</span>
               </div>
             )}
-            <div className="flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-slate-400" />
+            <div className="flex items-center gap-2 bg-surface-container-low dark:bg-slate-800/40 border border-surface-border rounded-xl px-3.5 py-2 shadow-sm">
+              <CalendarDays className="w-4 h-4 text-primary" />
               <input
                 type="month"
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition-all cursor-pointer hover:border-slate-300 dark:hover:border-slate-600"
+                className="bg-transparent border-none p-0 text-sm font-bold text-primary dark:text-slate-200 focus:ring-0 outline-none cursor-pointer"
               />
             </div>
           </div>

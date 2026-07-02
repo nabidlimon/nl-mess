@@ -48,15 +48,15 @@ export default function Dashboard() {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
       setGreeting(language === 'bn' ? 'শুভ সকাল' : 'Good Morning');
-      setThemeStyle('bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-900');
+      setThemeStyle('bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-250/20 text-amber-800 dark:text-amber-300');
       setGreetingIcon(Sunrise);
     } else if (hour >= 12 && hour < 17) {
       setGreeting(language === 'bn' ? 'শুভ অপরাহ্ন' : 'Good Afternoon');
-      setThemeStyle('bg-gradient-to-r from-sky-50 to-blue-50 border-sky-200 text-sky-900');
+      setThemeStyle('bg-gradient-to-r from-sky-500/10 to-blue-500/10 border-sky-250/20 text-sky-900 dark:text-sky-300');
       setGreetingIcon(Sun);
     } else {
       setGreeting(language === 'bn' ? 'শুভ সন্ধ্যা' : 'Good Evening');
-      setThemeStyle('bg-gradient-to-r from-indigo-50 to-slate-100 border-indigo-200 text-indigo-900');
+      setThemeStyle('bg-gradient-to-r from-primary-container/20 to-indigo-950/20 border-primary-container/10 text-primary dark:text-indigo-200');
       setGreetingIcon(Moon);
     }
 
@@ -419,11 +419,11 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Time-Aware Greeting */}
-      <div className={cn("p-6 sm:p-8 rounded-3xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4", themeStyle)}>
+      <div className={cn("p-5 sm:p-8 rounded-3xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card", themeStyle)}>
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-             <GreetingIcon className="w-8 h-8 opacity-80" />
-             <h1 className="text-3xl font-black tracking-tight font-display">{greeting}, {userProfile?.name?.split(' ')[0]}</h1>
+             <GreetingIcon className="w-8 h-8 opacity-80 shrink-0" />
+             <h1 className="text-2xl sm:text-3xl font-black tracking-tight font-display">{greeting}, {userProfile?.name?.split(' ')[0]}</h1>
           </div>
           <p className="text-sm font-medium opacity-80">
              {language === 'bn' ? 'আপনার মেসের আজকের আপডেট এবং ব্যক্তিগত হিসাব নিচে দেওয়া হলো।' : 'Here is your personalized mess update and passbook summary.'}
@@ -435,8 +435,8 @@ export default function Dashboard() {
       {(() => {
         const combinedNotices = [...systemAlerts, ...notices];
         return (
-          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 transition-colors duration-200">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-5 gap-3">
+          <div className="bg-surface-container dark:bg-slate-900/40 rounded-3xl border border-surface-border p-6 transition-colors duration-200 glass-card">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-surface-border pb-4 mb-5 gap-3">
               <div className="flex items-center gap-3">
                 <span className="p-2.5 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-2xl text-blue-600 dark:text-blue-400 animate-pulse">
                    <Megaphone className="w-5 h-5" />
@@ -466,8 +466,8 @@ export default function Dashboard() {
                     const isSystem = !!notice.isSystem;
                     
                     // Color code based on alert type or custom system styles
-                    let borderClass = 'border-slate-200 dark:border-slate-800';
-                    let bgClass = 'bg-white dark:bg-slate-900/40';
+                    let borderClass = 'border-surface-border';
+                    let bgClass = 'bg-surface-container-lowest dark:bg-slate-950/40';
                     if (isSystem) {
                       if (notice.type === 'danger') {
                         borderClass = 'border-red-200 dark:border-red-950/40';
@@ -486,7 +486,7 @@ export default function Dashboard() {
 
                     return (
                       <div key={notice.id} className={cn(
-                         "p-5 rounded-2xl border transition-all duration-200 hover:shadow-sm group relative overflow-hidden flex flex-col justify-between",
+                         "p-4 sm:p-5 rounded-2xl border transition-all duration-200 hover:shadow-sm group relative overflow-hidden flex flex-col justify-between",
                          borderClass,
                          bgClass
                       )}>
@@ -514,7 +514,7 @@ export default function Dashboard() {
                                   {idx + 1}
                                </div>
                                <div className="flex-1 min-w-0">
-                                  <h4 className="text-sm font-black text-slate-800 dark:text-white truncate mb-1 pr-12">{notice.title}</h4>
+                                  <h4 className="text-xs sm:text-sm font-black text-slate-800 dark:text-white truncate mb-1 pr-12">{notice.title}</h4>
                                   <div className="flex items-center gap-1.5 text-[9px] text-slate-400 font-bold mb-3">
                                      <span>{notice.author}</span>
                                      <span>•</span>
@@ -571,8 +571,8 @@ export default function Dashboard() {
 
       {/* Today's Mess Overview (Manager View) */}
       {isAdmin && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm transition-all duration-200">
-          <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-805 pb-4 mb-5">
+        <div className="glass-card rounded-3xl p-6 shadow-sm transition-all duration-200">
+          <div className="flex items-center gap-3 border-b border-surface-border pb-4 mb-5">
             <span className="p-2.5 bg-blue-50 dark:bg-blue-955/30 border border-blue-100 dark:border-blue-900/50 rounded-2xl text-blue-600 dark:text-blue-400">
               <ClipboardCheck className="w-5 h-5" />
             </span>
@@ -590,7 +590,7 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {/* Breakfast Plates */}
-            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+            <div className="bg-surface-container-low dark:bg-slate-950/20 border border-surface-border p-3 sm:p-4 rounded-2xl transition-all hover:bg-slate-100/30">
               <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
                 {language === 'bn' ? 'সকালের মিল' : 'Breakfast'}
               </span>
@@ -603,8 +603,8 @@ export default function Dashboard() {
             </div>
 
             {/* Lunch Plates */}
-            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
-              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+            <div className="bg-surface-container-low dark:bg-slate-950/20 border border-surface-border p-3 sm:p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-455 dark:text-slate-500 uppercase tracking-widest block mb-1">
                 {language === 'bn' ? 'দুপুরের মিল' : 'Lunch'}
               </span>
               <h4 className="text-2xl font-black text-slate-900 dark:text-white font-display">
@@ -616,8 +616,8 @@ export default function Dashboard() {
             </div>
 
             {/* Dinner Plates */}
-            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
-              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+            <div className="bg-surface-container-low dark:bg-slate-950/20 border border-surface-border p-3 sm:p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-455 dark:text-slate-500 uppercase tracking-widest block mb-1">
                 {language === 'bn' ? 'রাতের মিল' : 'Dinner'}
               </span>
               <h4 className="text-2xl font-black text-slate-900 dark:text-white font-display">
@@ -629,21 +629,21 @@ export default function Dashboard() {
             </div>
 
             {/* Guest Meals */}
-            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
-              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+            <div className="bg-surface-container-low dark:bg-slate-950/20 border border-surface-border p-3 sm:p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-455 dark:text-slate-500 uppercase tracking-widest block mb-1">
                 {language === 'bn' ? 'মোট গেস্ট মিল' : 'Guest Meals'}
               </span>
               <h4 className="text-2xl font-black text-slate-900 dark:text-white font-display">
                 {totalGuestMealsToday} <span className="text-xs text-slate-405 font-normal">{language === 'bn' ? 'টি' : 'meals'}</span>
               </h4>
-              <p className="text-[10px] text-slate-450 dark:text-slate-500 mt-1 font-bold leading-none">
+              <p className="text-[10px] text-slate-450 dark:text-slate-555 mt-1 font-bold leading-none">
                 {language === 'bn' ? 'অনুমোদিত গেস্ট মিল' : 'Active guest plates today'}
               </p>
             </div>
 
             {/* Today's Bazar Cost */}
-            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
-              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+            <div className="bg-surface-container-low dark:bg-slate-950/20 border border-surface-border p-3 sm:p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-455 dark:text-slate-500 uppercase tracking-widest block mb-1">
                 {language === 'bn' ? 'আজকের বাজার' : 'Today\'s Bazar'}
               </span>
               <h4 className="text-2xl font-black text-slate-900 dark:text-white font-display">
@@ -655,8 +655,8 @@ export default function Dashboard() {
             </div>
 
             {/* Today's Meal Rate */}
-            <div className="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl transition-all hover:bg-slate-100/30">
-              <span className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest block mb-1">
+            <div className="bg-surface-container-low dark:bg-slate-950/20 border border-surface-border p-3 sm:p-4 rounded-2xl transition-all hover:bg-slate-100/30">
+              <span className="text-[10px] font-black text-slate-455 dark:text-slate-500 uppercase tracking-widest block mb-1">
                 {language === 'bn' ? 'আজকের রেট' : 'Today\'s Rate'}
               </span>
               <h4 className="text-2xl font-black text-indigo-600 dark:text-indigo-400 font-display">
@@ -672,13 +672,13 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* My Passbook Widget */}
-        <div className="bg-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden ring-4 ring-slate-900/5">
+        <div className="bg-primary text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden ring-4 ring-primary/5">
           <div className="absolute -right-6 -top-6">
-             <Wallet className="w-32 h-32 text-slate-800" />
+             <Wallet className="w-32 h-32 text-indigo-950/40" />
           </div>
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-6">
-              <span className="p-2 bg-blue-500/20 rounded-xl text-blue-400">
+              <span className="p-2 bg-blue-500/20 rounded-xl text-blue-450">
                 <Wallet className="w-5 h-5" />
               </span>
               <h2 className="text-sm font-black tracking-widest text-slate-300 uppercase">{language === 'bn' ? 'আমার হিসাব (পাসবুক)' : 'My Passbook'}</h2>
@@ -686,26 +686,26 @@ export default function Dashboard() {
             
             <div className="mb-8">
                <p className="text-xs text-slate-400 font-bold mb-1 uppercase tracking-wider">{myBalance >= 0 ? (language === 'bn' ? 'ব্যালেন্স (পাওনা)' : 'Current Balance (Surplus)') : (language === 'bn' ? 'বকেয়া (দেনা)' : 'Current Due')}</p>
-               <h3 className={cn("text-4xl md:text-5xl font-black font-display tracking-tight", myBalance >= 0 ? "text-emerald-400" : "text-rose-400")}>
+               <h3 className={cn("text-4xl md:text-5xl font-black font-display tracking-tight", myBalance >= 0 ? "text-emerald-400" : "text-rose-455")}>
                   {myBalance >= 0 ? '+' : ''}{myBalance.toFixed(0)} <span className="text-lg font-sans text-slate-500">{t('common.currency')}</span>
                </h3>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-800/50 border border-slate-700 p-4 rounded-2xl">
-                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{language === 'bn' ? 'আমার মোট খরচ' : 'My Total Cost'}</p>
-                 <p className="text-xl font-bold font-display">{myCost.toFixed(0)} <span className="text-xs text-slate-500">{t('common.currency')}</span></p>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="bg-white/10 border border-white/10 p-3.5 sm:p-4 rounded-2xl">
+                 <p className="text-[10px] text-slate-350 font-black uppercase tracking-widest mb-1">{language === 'bn' ? 'আমার মোট খরচ' : 'My Total Cost'}</p>
+                 <p className="text-xl font-bold font-display">{myCost.toFixed(0)} <span className="text-xs text-slate-400">{t('common.currency')}</span></p>
               </div>
-              <div className="bg-slate-800/50 border border-slate-700 p-4 rounded-2xl">
-                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{language === 'bn' ? 'আমার মোট মিল' : 'My Total Meals'}</p>
-                 <p className="text-xl font-bold font-display">{myMeals} <span className="text-xs text-slate-500">{language === 'bn' ? 'টি' : 'Meals'}</span></p>
+              <div className="bg-white/10 border border-white/10 p-3.5 sm:p-4 rounded-2xl">
+                 <p className="text-[10px] text-slate-350 font-black uppercase tracking-widest mb-1">{language === 'bn' ? 'আমার মোট মিল' : 'My Total Meals'}</p>
+                 <p className="text-xl font-bold font-display">{myMeals} <span className="text-xs text-slate-400">{language === 'bn' ? 'টি' : 'Meals'}</span></p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Tomorrow's Meal Smart Widget */}
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 flex flex-col justify-between relative overflow-hidden group">
+        <div className="glass-card rounded-3xl p-6 md:p-8 shadow-sm flex flex-col justify-between relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-5 transform translate-x-2 -translate-y-2 pointer-events-none transition-transform group-hover:scale-110">
             <Utensils className="w-32 h-32 text-indigo-600" />
           </div>
@@ -727,47 +727,47 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="grid grid-cols-4 gap-2 mb-4 relative z-10">
+          <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4 relative z-10">
              <button
                 disabled={isPastDeadline}
                 onClick={() => handleToggleTomorrowMeal('morning')}
-                className={cn(`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.morning ? "border-amber-400 bg-amber-50 text-amber-800" : "border-slate-100 bg-slate-50 text-slate-500")}
+                className={cn(`flex flex-col items-center justify-center p-2 sm:p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.morning ? "border-amber-400 bg-amber-50 text-amber-800" : "border-slate-100 bg-slate-50 text-slate-500")}
              >
                 <Sunrise className="w-5 h-5 mb-1" />
-                <span className="text-[10px] font-bold">{language === 'bn' ? 'সকাল' : 'Morning'}</span>
+                <span className="text-[9px] sm:text-[10px] font-bold">{language === 'bn' ? 'সকাল' : 'Morning'}</span>
              </button>
              <button
                 disabled={isPastDeadline}
                 onClick={() => handleToggleTomorrowMeal('lunch')}
-                className={cn(`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.lunch ? "border-orange-400 bg-orange-50 text-orange-800" : "border-slate-100 bg-slate-50 text-slate-500")}
+                className={cn(`flex flex-col items-center justify-center p-2 sm:p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.lunch ? "border-orange-400 bg-orange-50 text-orange-800" : "border-slate-100 bg-slate-50 text-slate-500")}
              >
                 <Sun className="w-5 h-5 mb-1" />
-                <span className="text-[10px] font-bold">{language === 'bn' ? 'দুপুর' : 'Lunch'}</span>
+                <span className="text-[9px] sm:text-[10px] font-bold">{language === 'bn' ? 'দুপুর' : 'Lunch'}</span>
              </button>
              <button
                 disabled={isPastDeadline}
                 onClick={() => handleToggleTomorrowMeal('dinner')}
-                className={cn(`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.dinner ? "border-indigo-400 bg-indigo-50 text-indigo-800" : "border-slate-100 bg-slate-50 text-slate-500")}
+                className={cn(`flex flex-col items-center justify-center p-2 sm:p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.dinner ? "border-indigo-400 bg-indigo-50 text-indigo-800" : "border-slate-100 bg-slate-50 text-slate-500")}
              >
                 <Moon className="w-5 h-5 mb-1" />
-                <span className="text-[10px] font-bold">{language === 'bn' ? 'রাত' : 'Dinner'}</span>
+                <span className="text-[9px] sm:text-[10px] font-bold">{language === 'bn' ? 'রাত' : 'Dinner'}</span>
              </button>
              <button
                 disabled={isPastDeadline}
                 onClick={() => handleToggleTomorrowMeal('off')}
-                className={cn(`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.mealOff ? "border-rose-400 bg-rose-50 text-rose-800" : "border-slate-100 bg-slate-50 text-slate-500")}
+                className={cn(`flex flex-col items-center justify-center p-2 sm:p-3 rounded-2xl border-2 transition-all ${isPastDeadline ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`, tomorrowMeal?.mealOff ? "border-rose-400 bg-rose-50 text-rose-800" : "border-slate-100 bg-slate-50 text-slate-500")}
              >
                 <Ban className="w-5 h-5 mb-1" />
-                <span className="text-[10px] font-bold">{language === 'bn' ? 'বন্ধ' : 'Off'}</span>
+                <span className="text-[9px] sm:text-[10px] font-bold">{language === 'bn' ? 'বন্ধ' : 'Off'}</span>
              </button>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
+          <div className="flex items-center gap-2 text-[11px] sm:text-xs font-bold text-slate-500 bg-slate-50 p-2.5 sm:p-3 rounded-xl border border-slate-100">
              <Info className={cn("w-4 h-4 shrink-0", isPastDeadline ? "text-red-500" : "text-blue-500")} />
              <p className={isPastDeadline ? "text-red-600 dark:text-red-400" : ""}>
-               {isPastDeadline 
-                 ? (language === 'bn' ? 'রাত ১০টার পর আগামীকালের মিল পরিবর্তন করা যাবে না।' : 'You cannot change tomorrow\'s meal after 10:00 PM.') 
-                 : (language === 'bn' ? 'ক্লিক করে মিল চালু বা বন্ধ করুন। স্বয়ংক্রিয়ভাবে সেভ হবে।' : 'Click to toggle your meals. Auto-saves instantly.')}
+                {isPastDeadline 
+                  ? (language === 'bn' ? 'রাত ১০টার পর আগামীকালের মিল পরিবর্তন করা যাবে না।' : 'You cannot change tomorrow\'s meal after 10:00 PM.') 
+                  : (language === 'bn' ? 'ক্লিক করে মিল চালু বা বন্ধ করুন। স্বয়ংক্রিয়ভাবে সেভ হবে।' : 'Click to toggle your meals. Auto-saves instantly.')}
              </p>
           </div>
         </div>
@@ -776,46 +776,46 @@ export default function Dashboard() {
       <MealPollsWidget />
 
       <div>
-        <h2 className="text-xl font-black text-slate-800 tracking-tight mb-4">{language === 'bn' ? 'মেস ওভারভিউ' : 'Mess Overview'}</h2>
+        <h2 className="text-xl font-black text-slate-850 dark:text-slate-200 tracking-tight mb-4">{language === 'bn' ? 'মেস ওভারভিউ' : 'Mess Overview'}</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          <div className="bg-white p-5 rounded-2xl border-l-[5px] border-l-sky-500 border-y border-r border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('members.tab_active')}</p>
+          <div className="glass-card p-5 rounded-2xl border-l-[5px] border-l-sky-500 shadow-sm hover:shadow-md transition-all duration-200">
+            <p className="text-[10px] font-black text-slate-450 uppercase tracking-widest mb-1">{t('members.tab_active')}</p>
             <div className="flex items-baseline justify-between mt-2">
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-display">{activeMembers.length}</h3>
               <span className="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded-lg">{t('members.tab_active')}</span>
             </div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border-l-[5px] border-l-amber-500 border-y border-r border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('dashboard.total_meals')}</p>
+          <div className="glass-card p-5 rounded-2xl border-l-[5px] border-l-amber-500 shadow-sm hover:shadow-md transition-all duration-200">
+            <p className="text-[10px] font-black text-slate-450 uppercase tracking-widest mb-1">{t('dashboard.total_meals')}</p>
             <div className="flex items-baseline justify-between mt-2">
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-display">{totalMeals}</h3>
               <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg">{t('nav.meals')}</span>
             </div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border-l-[5px] border-l-emerald-500 border-y border-r border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('dashboard.total_deposit')}</p>
+          <div className="glass-card p-5 rounded-2xl border-l-[5px] border-l-emerald-500 shadow-sm hover:shadow-md transition-all duration-200">
+            <p className="text-[10px] font-black text-slate-450 uppercase tracking-widest mb-1">{t('dashboard.total_deposit')}</p>
             <div className="flex items-baseline justify-between mt-2">
               <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-display">{totalDeposits.toFixed(0)} <span className="text-xs font-bold text-slate-400 font-sans">{t('common.currency')}</span></h3>
               <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">{t('nav.deposits')}</span>
             </div>
           </div>
-          <div className="col-span-2 sm:col-span-1 bg-gradient-to-br from-slate-900 to-slate-950 p-5 rounded-2xl border border-slate-800 shadow-lg shadow-blue-900/5 ring-4 ring-blue-500/5">
-            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">{t('dashboard.meal_rate')}</p>
+          <div className="col-span-2 sm:col-span-1 bg-gradient-to-br from-primary to-primary-container p-5 rounded-2xl border border-primary/50 shadow-lg shadow-blue-900/5 ring-4 ring-primary/5">
+            <p className="text-[10px] font-black text-blue-300 uppercase tracking-widest mb-1">{t('dashboard.meal_rate')}</p>
             <div className="flex items-baseline justify-between mt-2">
               <h3 className="text-3xl font-black text-white font-display">{mealRate.toFixed(2)} <span className="text-xs font-bold text-slate-400 font-sans">{t('common.currency')}</span></h3>
-              <span className="text-[10px] font-black text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-lg uppercase tracking-wider">{language === 'bn' ? 'হার' : 'Rate'}</span>
+              <span className="text-[10px] font-black text-blue-300 bg-white/10 border border-white/20 px-2.5 py-0.5 rounded-lg uppercase tracking-wider">{language === 'bn' ? 'হার' : 'Rate'}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 lg:col-span-1 flex flex-col justify-center min-h-[140px] relative overflow-hidden group">
+        <div className="glass-card rounded-2xl shadow-sm p-6 lg:col-span-1 flex flex-col justify-center min-h-[140px] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 opacity-5 transform translate-x-2 -translate-y-2 pointer-events-none transition-transform group-hover:scale-110">
             <ShoppingCart className="w-32 h-32 text-blue-600" />
           </div>
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{t('dashboard.total_bazar')}</h4>
+            <h4 className="text-[11px] font-black text-slate-450 uppercase tracking-widest">{t('dashboard.total_bazar')}</h4>
           </div>
           <div>
             <span className="text-4xl sm:text-5xl font-black text-blue-600 font-display block">{totalBazarCost.toFixed(0)} {t('common.currency')}</span>
@@ -823,9 +823,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 lg:col-span-2">
+        <div className="glass-card rounded-2xl shadow-sm p-6 lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
-            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{t('dashboard.daily_chart_title')}</h4>
+            <h4 className="text-[11px] font-black text-slate-455 uppercase tracking-widest">{t('dashboard.daily_chart_title')}</h4>
           </div>
           <div className="h-[240px] sm:h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
