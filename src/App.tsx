@@ -3,30 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { MonthProvider } from './contexts/MonthContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { AppLoadingScreen } from './components/AppLoadingScreen';
-
-import Login from './pages/Login';
-import LandingPage from './pages/LandingPage';
-import Dashboard from './pages/Dashboard';
-import Onboarding from './pages/Onboarding';
-import Members from './pages/Members';
-import Meals from './pages/Meals';
-import Deposits from './pages/Deposits';
-import Bazar from './pages/Bazar';
-import Settlement from './pages/Settlement';
-import About from './pages/About';
-import AuthorityPanel from './pages/AuthorityPanel';
-import TomorrowMeal from './pages/TomorrowMeal';
-import Profile from './pages/Profile';
-import ManagerPanel from './pages/ManagerPanel';
-import Approvals from './pages/Approvals';
 import { useLanguage } from './contexts/LanguageContext';
+
+const Login = lazy(() => import('./pages/Login'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
+const Members = lazy(() => import('./pages/Members'));
+const Meals = lazy(() => import('./pages/Meals'));
+const Deposits = lazy(() => import('./pages/Deposits'));
+const Bazar = lazy(() => import('./pages/Bazar'));
+const Settlement = lazy(() => import('./pages/Settlement'));
+const About = lazy(() => import('./pages/About'));
+const AuthorityPanel = lazy(() => import('./pages/AuthorityPanel'));
+const TomorrowMeal = lazy(() => import('./pages/TomorrowMeal'));
+const Profile = lazy(() => import('./pages/Profile'));
+const ManagerPanel = lazy(() => import('./pages/ManagerPanel'));
+const Approvals = lazy(() => import('./pages/Approvals'));
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, userProfile, loading, logout, isSupreme, hasEntered, setHasEntered } = useAuth();
@@ -125,28 +125,30 @@ function RoutesConfig() {
 
 
   return (
-    <Routes>
-      <Route path="/login" element={(user || userProfile) ? <Navigate to="/dashboard" replace /> : <Login />} />
-      
-      {/* Smart Landing Page: loader → redirect to dashboard if logged in, else show page */}
-      <Route path="/" element={<SmartRoot />} />
+    <Suspense fallback={<AppLoadingScreen />}>
+      <Routes>
+        <Route path="/login" element={(user || userProfile) ? <Navigate to="/dashboard" replace /> : <Login />} />
+        
+        {/* Smart Landing Page: loader → redirect to dashboard if logged in, else show page */}
+        <Route path="/" element={<SmartRoot />} />
 
-      {/* Protected Routes */}
-      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-      <Route path="/onboarding" element={<PrivateRoute><Onboarding /></PrivateRoute>} />
-      <Route path="/members" element={<PrivateRoute><Members /></PrivateRoute>} />
-      <Route path="/meals" element={<PrivateRoute><Meals /></PrivateRoute>} />
-      <Route path="/tomorrow-meal" element={<PrivateRoute><TomorrowMeal /></PrivateRoute>} />
-      <Route path="/deposits" element={<PrivateRoute><Deposits /></PrivateRoute>} />
-      <Route path="/bazar" element={<PrivateRoute><Bazar /></PrivateRoute>} />
-      <Route path="/settlement" element={<PrivateRoute><Settlement /></PrivateRoute>} />
-      <Route path="/manager-panel" element={<PrivateRoute><ManagerPanel /></PrivateRoute>} />
-      <Route path="/approvals" element={<PrivateRoute><Approvals /></PrivateRoute>} />
-      <Route path="/about" element={<PrivateRoute><About /></PrivateRoute>} />
-      <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-      <Route path="/authority" element={<PrivateRoute><AuthorityPanel /></PrivateRoute>} />
-      <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
-    </Routes>
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/onboarding" element={<PrivateRoute><Onboarding /></PrivateRoute>} />
+        <Route path="/members" element={<PrivateRoute><Members /></PrivateRoute>} />
+        <Route path="/meals" element={<PrivateRoute><Meals /></PrivateRoute>} />
+        <Route path="/tomorrow-meal" element={<PrivateRoute><TomorrowMeal /></PrivateRoute>} />
+        <Route path="/deposits" element={<PrivateRoute><Deposits /></PrivateRoute>} />
+        <Route path="/bazar" element={<PrivateRoute><Bazar /></PrivateRoute>} />
+        <Route path="/settlement" element={<PrivateRoute><Settlement /></PrivateRoute>} />
+        <Route path="/manager-panel" element={<PrivateRoute><ManagerPanel /></PrivateRoute>} />
+        <Route path="/approvals" element={<PrivateRoute><Approvals /></PrivateRoute>} />
+        <Route path="/about" element={<PrivateRoute><About /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+        <Route path="/authority" element={<PrivateRoute><AuthorityPanel /></PrivateRoute>} />
+        <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 
